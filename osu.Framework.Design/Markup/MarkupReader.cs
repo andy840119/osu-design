@@ -35,11 +35,17 @@ namespace osu.Framework.Design.Markup
                 if (attr.Name.LocalName.Equals("id", StringComparison.OrdinalIgnoreCase))
                     d.Id = attr.Value;
                 else
-                    d.Attributes[attr.Name.LocalName] = parseAttribute(attr, d.DrawableType);
+                {
+                    var a = parseAttribute(attr, d.DrawableType);
+                    d.Attributes[a.Name] = a;
+                }
             }
 
             foreach (var elem in element.Elements().Where(e => e.Name.LocalName.StartsWith('_') && e.Name.Namespace == XNamespace.None))
-                d.Attributes[elem.Name.LocalName.Substring(1)] = parseNestedAttribute(elem, d.DrawableType);
+            {
+                var a = parseNestedAttribute(elem, d.DrawableType);
+                d.Attributes[a.Name] = a;
+            }
 
             // Parse children recursively
             d.Children = element
