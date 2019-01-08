@@ -51,7 +51,7 @@ namespace osu.Framework.Design.CodeGeneration
                 statements: new[]
                 {
                     GenerateAttributeInitialization(d, g),
-                    GenerateDescendantInitialization(d, g)
+                    GenerateDescendantInitialization(d, g, isRoot: true)
                 }
                 .SelectMany(n => n)
             );
@@ -66,7 +66,7 @@ namespace osu.Framework.Design.CodeGeneration
                 );
         }
 
-        public static IEnumerable<SyntaxNode> GenerateDescendantInitialization(DrawableData d, SyntaxGenerator g)
+        public static IEnumerable<SyntaxNode> GenerateDescendantInitialization(DrawableData d, SyntaxGenerator g, bool isRoot = false)
         {
             foreach (var child in d.Children)
             {
@@ -85,7 +85,7 @@ namespace osu.Framework.Design.CodeGeneration
 
                 // Invoke Add
                 yield return g.InvocationExpression(
-                    expression: g.IdentifierName($"{d.Id}.Add"),
+                    expression: g.IdentifierName(isRoot ? "Add" : $"{d.Id}.Add"),
                     arguments: new[] { g.IdentifierName(child.Id) }
                 );
             }
