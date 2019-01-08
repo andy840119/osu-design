@@ -10,14 +10,12 @@ namespace osu.Framework.Design.Markup
         public PropertyInfo Property { get; }
         public Type Type => Property.PropertyType;
 
-        public object Value { get; }
-        public bool ParseAsNested { get; }
+        public object Value { get; set; }
+        public bool ParseAsNested { get; set; }
 
-        public DrawableAttribute(PropertyInfo property, object value, bool nested)
+        public DrawableAttribute(PropertyInfo property)
         {
             Property = property;
-            Value = value;
-            ParseAsNested = nested;
         }
 
         public IConverter Converter => Type.IsEnum ? ConverterFactory.Get<Enum>() : ConverterFactory.Get(Type);

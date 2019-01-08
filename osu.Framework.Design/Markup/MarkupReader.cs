@@ -51,18 +51,17 @@ namespace osu.Framework.Design.Markup
             return d;
         }
 
-        DrawableAttribute parseAttribute(XAttribute attr, Type drawableType)
+        DrawableAttribute parseAttribute(XAttribute xattr, Type drawableType)
         {
-            var property = drawableType.GetProperty(attr.Name.LocalName);
+            var property = drawableType.GetProperty(xattr.Name.LocalName);
 
             if (property == null)
-                throw new KeyNotFoundException($"'{drawableType}' does not contain a property named '{attr.Name.LocalName}'.");
+                throw new KeyNotFoundException($"'{drawableType}' does not contain a property named '{xattr.Name.LocalName}'.");
 
-            return new DrawableAttribute(
-                property: property,
-                value: getConverter(property).DeserializeFromString(attr.Value, property.PropertyType),
-                nested: false
-            );
+            var attr = new DrawableAttribute(property);
+            attr.Value = attr.Converter.DeserializeFromString(xattr.Value, property.PropertyType);
+            attr.ParseAsNested = false;
+            return attr;
         }
 
         DrawableAttribute parseNestedAttribute(XElement elem, Type drawableType)
@@ -72,11 +71,10 @@ namespace osu.Framework.Design.Markup
             if (property == null)
                 throw new KeyNotFoundException($"'{drawableType}' does not contain a property named '{elem.Name.LocalName}'.");
 
-            return new DrawableAttribute(
-                property: property,
-                value: getConverter(property).DeserializeFromElement(elem, property.PropertyType),
-                nested: true
-            );
+            var attr = new DrawableAttribute(property);
+            attr.Value = attr.Converter.DeserializeFromElement(elem, property.PropertyType);
+            attr.ParseAsNested = false;
+            return attr;
         }
 
         IConverter getConverter(PropertyInfo p) => p.PropertyType.IsEnum ? ConverterFactory.Get<Enum>() : ConverterFactory.Get(p.PropertyType);
