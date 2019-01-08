@@ -1,5 +1,7 @@
 using System;
 using System.Xml.Linq;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Editing;
 
 namespace osu.Framework.Design.Markup.Converters
 {
@@ -13,6 +15,8 @@ namespace osu.Framework.Design.Markup.Converters
 
         public void SerializeAsElement(object value, XElement element) => element.Value = value.ToString();
         public void SerializeAsString(object value, out string data) => data = value.ToString();
+
+        public SyntaxNode GenerateInstantiation(object value, SyntaxGenerator g) => g.LiteralExpression(value);
     }
 
     public class ByteConverter : IConverter
@@ -25,6 +29,8 @@ namespace osu.Framework.Design.Markup.Converters
 
         public void SerializeAsElement(object value, XElement element) => element.Value = value.ToString();
         public void SerializeAsString(object value, out string data) => data = value.ToString();
+
+        public SyntaxNode GenerateInstantiation(object value, SyntaxGenerator g) => g.LiteralExpression(value);
     }
 
     public class Int16Converter : IConverter
@@ -37,6 +43,8 @@ namespace osu.Framework.Design.Markup.Converters
 
         public void SerializeAsElement(object value, XElement element) => element.Value = value.ToString();
         public void SerializeAsString(object value, out string data) => data = value.ToString();
+
+        public SyntaxNode GenerateInstantiation(object value, SyntaxGenerator g) => g.LiteralExpression(value);
     }
 
     public class Int32Converter : IConverter
@@ -49,6 +57,8 @@ namespace osu.Framework.Design.Markup.Converters
 
         public void SerializeAsElement(object value, XElement element) => element.Value = value.ToString();
         public void SerializeAsString(object value, out string data) => data = value.ToString();
+
+        public SyntaxNode GenerateInstantiation(object value, SyntaxGenerator g) => g.LiteralExpression(value);
     }
 
     public class Int64Converter : IConverter
@@ -61,6 +71,8 @@ namespace osu.Framework.Design.Markup.Converters
 
         public void SerializeAsElement(object value, XElement element) => element.Value = value.ToString();
         public void SerializeAsString(object value, out string data) => data = value.ToString();
+
+        public SyntaxNode GenerateInstantiation(object value, SyntaxGenerator g) => g.LiteralExpression(value);
     }
 
     public class SingleConverter : IConverter
@@ -73,6 +85,8 @@ namespace osu.Framework.Design.Markup.Converters
 
         public void SerializeAsElement(object value, XElement element) => element.Value = value.ToString();
         public void SerializeAsString(object value, out string data) => data = value.ToString();
+
+        public SyntaxNode GenerateInstantiation(object value, SyntaxGenerator g) => g.LiteralExpression(value);
     }
 
     public class DoubleConverter : IConverter
@@ -85,5 +99,7 @@ namespace osu.Framework.Design.Markup.Converters
 
         public void SerializeAsElement(object value, XElement element) => element.Value = value.ToString();
         public void SerializeAsString(object value, out string data) => data = value.ToString();
+
+        public SyntaxNode GenerateInstantiation(object value, SyntaxGenerator g) => g.LiteralExpression(value);
     }
 }

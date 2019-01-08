@@ -1,5 +1,7 @@
 using System;
 using System.Xml.Linq;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Editing;
 
 namespace osu.Framework.Design.Markup.Converters
 {
@@ -14,5 +16,7 @@ namespace osu.Framework.Design.Markup.Converters
 
         object DeserializeFromString(string data, Type type);
         object DeserializeFromElement(XElement element, Type type);
+
+        SyntaxNode GenerateInstantiation(object value, SyntaxGenerator g);
     }
 }

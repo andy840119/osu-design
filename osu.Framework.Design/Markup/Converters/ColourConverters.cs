@@ -1,6 +1,8 @@
 using System;
 using System.Linq;
 using System.Xml.Linq;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Editing;
 using osu.Framework.Graphics.Colour;
 using osuTK.Graphics;
 
@@ -62,6 +64,29 @@ namespace osu.Framework.Design.Markup.Converters
 
             return $"#{r}{g}{b}";
         }
+
+        public SyntaxNode GenerateInstantiation(object value, SyntaxGenerator g)
+        {
+            var c = (SRGBColour)value;
+
+            return GenerateInstantiation(c, g);
+        }
+        public static SyntaxNode GenerateInstantiation(SRGBColour c, SyntaxGenerator g)
+        {
+            return g.CastExpression(
+                type: g.IdentifierName(typeof(SRGBColour).FullName),
+                expression: g.ObjectCreationExpression(
+                    namedType: g.IdentifierName(typeof(Color4).FullName),
+                    arguments: new[]
+                    {
+                        g.LiteralExpression(c.Linear.R),
+                        g.LiteralExpression(c.Linear.G),
+                        g.LiteralExpression(c.Linear.B),
+                        g.LiteralExpression(c.Linear.A)
+                    }
+                )
+            );
+        }
     }
 
     public class ColourInfoConverter : IConverter
@@ -120,6 +145,22 @@ namespace osu.Framework.Design.Markup.Converters
         public void SerializeAsString(object value, out string data)
         {
             throw new NotSupportedException($"{nameof(ColourInfo)} cannot be serialized into plain string.");
+        }
+
+        public SyntaxNode GenerateInstantiation(object value, SyntaxGenerator g)
+        {
+            var c = (ColourInfo)value;
+
+            return g.ObjectCreationExpression(
+                namedType: g.IdentifierName(typeof(ColourInfo).FullName),
+                arguments: new[]
+                {
+                    SRGBColourConverter.GenerateInstantiation(c.TopLeft, g),
+                    SRGBColourConverter.GenerateInstantiation(c.BottomLeft, g),
+                    SRGBColourConverter.GenerateInstantiation(c.TopRight, g),
+                    SRGBColourConverter.GenerateInstantiation(c.BottomRight, g)
+                }
+            );
         }
     }
 }

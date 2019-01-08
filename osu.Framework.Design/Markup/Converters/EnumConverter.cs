@@ -1,5 +1,7 @@
 using System;
 using System.Xml.Linq;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Editing;
 
 namespace osu.Framework.Design.Markup.Converters
 {
@@ -13,5 +15,10 @@ namespace osu.Framework.Design.Markup.Converters
 
         public void SerializeAsElement(object value, XElement element) => element.Value = value.ToString();
         public void SerializeAsString(object value, out string data) => data = value.ToString();
+
+        public SyntaxNode GenerateInstantiation(object value, SyntaxGenerator g)
+        {
+            return g.IdentifierName($"{value.GetType()}.{value}");
+        }
     }
 }

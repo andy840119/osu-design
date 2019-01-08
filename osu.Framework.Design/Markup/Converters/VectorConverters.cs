@@ -1,5 +1,7 @@
 using System;
 using System.Xml.Linq;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Editing;
 using osuTK;
 
 namespace osu.Framework.Design.Markup.Converters
@@ -39,6 +41,20 @@ namespace osu.Framework.Design.Markup.Converters
                 data = $"{v.X},{v.Y}";
             else
                 data = null;
+        }
+
+        public SyntaxNode GenerateInstantiation(object value, SyntaxGenerator g)
+        {
+            var v = (Vector2)value;
+
+            return g.ObjectCreationExpression(
+                namedType: g.IdentifierName(typeof(Vector2).FullName),
+                arguments: new[]
+                {
+                    g.LiteralExpression(v.X),
+                    g.LiteralExpression(v.Y)
+                }
+            );
         }
     }
 
@@ -80,6 +96,21 @@ namespace osu.Framework.Design.Markup.Converters
                 data = $"{v.X},{v.Y},{v.Z}";
             else
                 data = null;
+        }
+
+        public SyntaxNode GenerateInstantiation(object value, SyntaxGenerator g)
+        {
+            var v = (Vector3)value;
+
+            return g.ObjectCreationExpression(
+                namedType: g.IdentifierName(typeof(Vector3).FullName),
+                arguments: new[]
+                {
+                    g.LiteralExpression(v.X),
+                    g.LiteralExpression(v.Y),
+                    g.LiteralExpression(v.Z)
+                }
+            );
         }
     }
 
@@ -124,6 +155,22 @@ namespace osu.Framework.Design.Markup.Converters
                 data = $"{v.X},{v.Y},{v.Z},{v.W}";
             else
                 data = null;
+        }
+
+        public SyntaxNode GenerateInstantiation(object value, SyntaxGenerator g)
+        {
+            var v = (Vector4)value;
+
+            return g.ObjectCreationExpression(
+                namedType: g.IdentifierName(typeof(Vector4).FullName),
+                arguments: new[]
+                {
+                    g.LiteralExpression(v.X),
+                    g.LiteralExpression(v.Y),
+                    g.LiteralExpression(v.Z),
+                    g.LiteralExpression(v.W)
+                }
+            );
         }
     }
 }
