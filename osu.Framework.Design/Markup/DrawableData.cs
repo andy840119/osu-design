@@ -8,6 +8,8 @@ namespace osu.Framework.Design.Markup
 {
     public class DrawableData
     {
+        public string Id { get; set; }
+
         public Type DrawableType { get; set; }
 
         public Dictionary<string, DrawableAttribute> Attributes { get; set; } = new Dictionary<string, DrawableAttribute>();

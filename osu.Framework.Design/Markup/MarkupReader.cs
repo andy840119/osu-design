@@ -38,7 +38,12 @@ namespace osu.Framework.Design.Markup
 
             // Parse attributes
             foreach (var attr in element.Attributes().Where(a => a.Name.Namespace == XNamespace.None))
-                d.Attributes[attr.Name.LocalName] = parseAttribute(attr, d.DrawableType);
+            {
+                if (attr.Name.LocalName.Equals("id", StringComparison.OrdinalIgnoreCase))
+                    d.Id = attr.Value;
+                else
+                    d.Attributes[attr.Name.LocalName] = parseAttribute(attr, d.DrawableType);
+            }
 
             foreach (var elem in element.Elements().Where(e => e.Name.LocalName.StartsWith('_') && e.Name.Namespace == XNamespace.None))
                 d.Attributes[elem.Name.LocalName.Substring(1)] = parseNestedAttribute(elem, d.DrawableType);
