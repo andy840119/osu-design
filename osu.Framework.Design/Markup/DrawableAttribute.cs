@@ -1,5 +1,6 @@
 using System;
 using System.Reflection;
+using osu.Framework.Design.Markup.Converters;
 
 namespace osu.Framework.Design.Markup
 {
@@ -7,6 +8,7 @@ namespace osu.Framework.Design.Markup
     {
         public string Name => Property.Name;
         public PropertyInfo Property { get; }
+        public Type Type => Property.PropertyType;
 
         public object Value { get; }
         public bool ParseAsNested { get; }
@@ -17,5 +19,7 @@ namespace osu.Framework.Design.Markup
             Value = value;
             ParseAsNested = nested;
         }
+
+        public IConverter Converter => Type.IsEnum ? ConverterFactory.Get<Enum>() : ConverterFactory.Get(Type);
     }
 }
