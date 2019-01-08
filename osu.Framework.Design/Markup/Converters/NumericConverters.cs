@@ -14,6 +14,7 @@ namespace osu.Framework.Design.Markup.Converters
         public void SerializeAsElement(object value, XElement element) => element.Value = value.ToString();
         public void SerializeAsString(object value, out string data) => data = value.ToString();
     }
+
     public class DoubleConverter : IConverter
     {
         public Type ConvertingType => typeof(double);
