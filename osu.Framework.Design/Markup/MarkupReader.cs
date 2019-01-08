@@ -34,6 +34,9 @@ namespace osu.Framework.Design.Markup
 
             foreach (var attr in element.Attributes().Where(a => a.Name.Namespace == XNamespace.None))
             {
+                if (attr.Name.LocalName.Equals("id", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
                 var a = parseAttribute(attr, d.DrawableType);
                 d.Attributes[a.Name] = a;
             }
