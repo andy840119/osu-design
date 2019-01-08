@@ -30,15 +30,12 @@ namespace osu.Framework.Design.Markup
             d.DrawableType = getTypeFromName(element.Name);
 
             // Parse attributes
+            d.Id = element.Attribute("id")?.Value ?? $"drawable_{element.GetHashCode()}";
+
             foreach (var attr in element.Attributes().Where(a => a.Name.Namespace == XNamespace.None))
             {
-                if (attr.Name.LocalName.Equals("id", StringComparison.OrdinalIgnoreCase))
-                    d.Id = attr.Value;
-                else
-                {
-                    var a = parseAttribute(attr, d.DrawableType);
-                    d.Attributes[a.Name] = a;
-                }
+                var a = parseAttribute(attr, d.DrawableType);
+                d.Attributes[a.Name] = a;
             }
 
             foreach (var elem in element.Elements().Where(e => e.Name.LocalName.StartsWith('_') && e.Name.Namespace == XNamespace.None))
