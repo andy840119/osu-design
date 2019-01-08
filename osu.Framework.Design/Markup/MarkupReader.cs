@@ -12,13 +12,6 @@ namespace osu.Framework.Design.Markup
 {
     public class MarkupReader
     {
-        static readonly IReadOnlyDictionary<Type, IConverter> _converters = typeof(MarkupReader).Assembly
-            .GetTypes()
-            .Where(t => !t.IsAbstract && typeof(IConverter).IsAssignableFrom(t))
-            .Select(Activator.CreateInstance)
-            .Cast<IConverter>()
-            .ToDictionary(c => c.ConvertingType, c => c);
-
         public readonly Dictionary<string, Dictionary<string, Type>> ImportedTypes = new Dictionary<string, Dictionary<string, Type>>();
 
         public DrawableData Parse(TextReader reader)
@@ -58,10 +51,6 @@ namespace osu.Framework.Design.Markup
             return d;
         }
 
-        public readonly Dictionary<Type, IConverter> AttributeConverters = new Dictionary<Type, IConverter>(_converters);
-
-        public void AddConverter(IConverter converter) => AttributeConverters.Add(converter.ConvertingType, converter);
-
         DrawableAttribute parseAttribute(XAttribute attr, Type drawableType)
         {
             var property = drawableType.GetProperty(attr.Name.LocalName);
@@ -90,7 +79,7 @@ namespace osu.Framework.Design.Markup
             );
         }
 
-        IConverter getConverter(PropertyInfo p) => p.PropertyType.IsEnum ? AttributeConverters[typeof(Enum)] : AttributeConverters[p.PropertyType];
+        IConverter getConverter(PropertyInfo p) => p.PropertyType.IsEnum ? ConverterFactory.Get<Enum>() : ConverterFactory.Get(p.PropertyType);
 
         Type getTypeFromName(XName name)
         {
