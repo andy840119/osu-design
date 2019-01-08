@@ -77,8 +77,6 @@ namespace osu.Framework.Design.Markup
             return attr;
         }
 
-        IConverter getConverter(PropertyInfo p) => p.PropertyType.IsEnum ? ConverterFactory.Get<Enum>() : ConverterFactory.Get(p.PropertyType);
-
         Type getTypeFromName(XName name)
         {
             if (!ImportedTypes.TryGetValue(name.NamespaceName, out var types))
