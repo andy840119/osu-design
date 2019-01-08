@@ -129,7 +129,7 @@ namespace osu.Framework.Design.Markup.Converters
         }
         public object DeserializeFromString(string data, Type type)
         {
-            throw new NotSupportedException($"{nameof(ColourInfo)} cannot be deserialized from plain string.");
+            return ColourInfo.SingleColour(SRGBColourConverter.FromHex(data));
         }
 
         public void SerializeAsElement(object value, XElement element)
@@ -144,7 +144,9 @@ namespace osu.Framework.Design.Markup.Converters
         }
         public void SerializeAsString(object value, out string data)
         {
-            throw new NotSupportedException($"{nameof(ColourInfo)} cannot be serialized into plain string.");
+            var c = (ColourInfo)value;
+
+            data = SRGBColourConverter.ToHex(c.TopLeft);
         }
 
         public SyntaxNode GenerateInstantiation(object value, SyntaxGenerator g)
