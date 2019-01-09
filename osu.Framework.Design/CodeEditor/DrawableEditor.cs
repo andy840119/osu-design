@@ -135,14 +135,17 @@ namespace osu.Framework.Design.CodeEditor
             switch (e.Key)
             {
                 case Key.Left:
-                    CaretPosition.Value--;
+                    CaretPosition.Value = Math.Max(CaretPosition.Value - 1, 0);
                     break;
                 case Key.Right:
-                    CaretPosition.Value++;
+                    CaretPosition.Value = Math.Min(CaretPosition.Value + 1, Model.Length);
                     break;
                 case Key.BackSpace:
-                    Model.Remove(CaretPosition.Value - 1, 1);
-                    CaretPosition.Value--;
+                    if (CaretPosition.Value > 0)
+                    {
+                        Model.Remove(CaretPosition.Value - 1, 1);
+                        CaretPosition.Value--;
+                    }
                     break;
                 default:
                     return false;
