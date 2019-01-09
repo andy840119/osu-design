@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using osu.Framework.Allocation;
 using osu.Framework.Configuration;
 using osu.Framework.Design.Markup;
@@ -48,13 +49,23 @@ namespace osu.Framework.Design.Designer
             _error = _errorDisplay.Current.GetBoundCopy();
         }
 
-        Bindable<Document> _document;
+        Bindable<WorkingDocument> _document;
+        Bindable<string> _documentContent;
 
         [BackgroundDependencyLoader]
         void load(Workspace workspace)
         {
             _document = workspace.CurrentDocument.GetBoundCopy();
-            _document.BindValueChanged(handleChange, true);
+            _document.BindValueChanged(d =>
+            {
+                _documentContent?.UnbindAll();
+
+                if (d == null)
+                    return;
+
+                _documentContent = d.Content.GetBoundCopy();
+                _documentContent.BindValueChanged(handleChange, true);
+            }, true);
         }
 
         ScheduledDelegate _updateTask;
@@ -62,15 +73,10 @@ namespace osu.Framework.Design.Designer
 
         public double UpdateDebounceMilliseconds { get; set; } = 600;
 
-        void handleChange(Document doc)
+        void handleChange(string content)
         {
-            _errorDisplay.FadeOut(30);
-
-            if (doc?.Type != DocumentType.Markup)
+            if (string.IsNullOrWhiteSpace(content))
             {
-                _statusText.Text = "Not markup";
-                _statusText.FadeColour(Color4.White, 200);
-
                 _content.Clear();
                 return;
             }
@@ -89,7 +95,7 @@ namespace osu.Framework.Design.Designer
                         // Read and parse markup
                         DrawableData data;
 
-                        using (var reader = doc.OpenReader())
+                        using (var reader = new StringReader(content))
                             data = new MarkupReader().Read(reader);
 
                         // Create drawable from markup
@@ -99,6 +105,8 @@ namespace osu.Framework.Design.Designer
 
                         _statusText.Text = "Waiting...";
                         _statusText.FadeColour(Color4.White, 200);
+
+                        _errorDisplay.FadeOut(30);
                     }
                     catch (Exception e)
                     {

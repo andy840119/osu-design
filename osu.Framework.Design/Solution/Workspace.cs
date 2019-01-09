@@ -14,7 +14,7 @@ namespace osu.Framework.Design.Solution
 
         public Bindable<DirectoryInfoBase> Directory { get; } = new Bindable<DirectoryInfoBase>();
         public BindableList<Document> Documents { get; } = new BindableList<Document>();
-        public Bindable<Document> CurrentDocument { get; } = new Bindable<Document>();
+        public Bindable<WorkingDocument> CurrentDocument { get; } = new Bindable<WorkingDocument>();
 
         public Workspace()
         {
@@ -71,15 +71,10 @@ namespace osu.Framework.Design.Solution
 
         void handleChanged(object sender, FileSystemEventArgs e)
         {
-            if (e.FullPath != CurrentDocument.Value?.File.FullName)
+            if (e.FullPath != CurrentDocument.Value?.Document.File.FullName)
                 return;
 
-            Scheduler.Add(() =>
-            {
-                var last = CurrentDocument.Value;
-                CurrentDocument.Value = null;
-                CurrentDocument.Value = last;
-            });
+            Scheduler.Add(CurrentDocument.Value.UpdateContent);
         }
 
         void handleDeleted(object sender, FileSystemEventArgs e)
@@ -88,6 +83,12 @@ namespace osu.Framework.Design.Solution
             {
                 Documents.RemoveAll(d => d.File.FullName == e.FullPath);
             });
+        }
+
+        public void SetCurrentDocument(Document doc)
+        {
+            CurrentDocument.Value = new WorkingDocument(doc);
+            CurrentDocument.Value.UpdateContent();
         }
 
         public void Dispose()

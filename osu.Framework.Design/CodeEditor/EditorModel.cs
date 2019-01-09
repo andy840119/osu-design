@@ -45,6 +45,12 @@ namespace osu.Framework.Design.CodeEditor
 
         public void Set(string value)
         {
+            if (string.IsNullOrEmpty(value))
+            {
+                Lines.Clear();
+                return;
+            }
+
             var parts = _splitRegex.Split(value);
 
             for (var i = 0; i < parts.Length; i++)

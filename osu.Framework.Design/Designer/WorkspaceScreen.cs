@@ -30,39 +30,44 @@ namespace osu.Framework.Design.Designer
                     Anchor = Anchor.TopLeft,
                     Origin = Anchor.TopLeft
                 },
-                // _preview = new PreviewContainer
-                // {
-                //     RelativeSizeAxes = Axes.Both,
-                //     Width = 0.8f,
-                //     Anchor = Anchor.TopRight,
-                //     Origin = Anchor.TopRight
-                // },
+                _preview = new PreviewContainer
+                {
+                    RelativeSizeAxes = Axes.Both,
+                    Width = 0.8f,
+                    Height = 0.6f,
+                    Anchor = Anchor.TopRight,
+                    Origin = Anchor.TopRight
+                },
                 _editor = new DrawableEditor
                 {
                     RelativeSizeAxes = Axes.Both,
                     Width = 0.8f,
-                    Anchor = Anchor.TopRight,
-                    Origin = Anchor.TopRight
+                    Height = 0.4f,
+                    Anchor = Anchor.BottomRight,
+                    Origin = Anchor.BottomRight
                 }
             };
         }
 
-        Bindable<Document> _doc;
+        Bindable<WorkingDocument> _document;
+        Bindable<string> _documentContent;
 
         [BackgroundDependencyLoader]
         void load(Workspace workspace)
         {
-            _doc = workspace.CurrentDocument;
-            _doc.BindValueChanged(d =>
+            _document = workspace.CurrentDocument.GetBoundCopy();
+            _document.BindValueChanged(d =>
             {
-                _editor.Model.Lines.Clear();
+                _documentContent?.UnbindAll();
 
                 if (d == null)
                     return;
 
-                using (var reader = d.OpenReader())
-                    _editor.Model.Set(reader.ReadToEnd());
-            });
+                _documentContent = d.Content.GetBoundCopy();
+            }, true);
+
+            _editor.Model.Lines.ItemsAdded += _ => _documentContent.Value = _editor.Model.Text;
+            _editor.Model.Lines.ItemsRemoved += _ => _documentContent.Value = _editor.Model.Text;
         }
     }
 }

@@ -199,7 +199,8 @@ namespace osu.Framework.Design.Designer
                 };
             }
 
-            Bindable<Document> _document { get; set; }
+            Workspace _workspace;
+            Bindable<WorkingDocument> _document { get; set; }
 
             Texture _tex;
             Texture _texOpen;
@@ -207,8 +208,9 @@ namespace osu.Framework.Design.Designer
             [BackgroundDependencyLoader]
             void load(Workspace workspace, TextureStore textures)
             {
+                _workspace = workspace;
                 _document = workspace.CurrentDocument.GetBoundCopy();
-                _document.BindValueChanged(d => Highlight(_doc != null && d == _doc), true);
+                _document.BindValueChanged(d => Highlight(_doc != null && d?.Document == _doc), true);
 
                 string tex;
 
@@ -320,7 +322,7 @@ namespace osu.Framework.Design.Designer
                     _collapsed = !_collapsed;
                 }
                 else
-                    _document.Value = _doc;
+                    _workspace.SetCurrentDocument(_doc);
 
                 return true;
             }
