@@ -94,6 +94,8 @@ namespace osu.Framework.Design.Designer
 
                         _content.FadeIn(30);
 
+                        _statusText.Text = "Waiting...";
+                        _statusText.FadeColour(Color4.White, 200);
                         _error.Value = null;
                     }
                     catch (Exception e)
