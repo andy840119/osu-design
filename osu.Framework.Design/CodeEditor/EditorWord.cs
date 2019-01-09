@@ -14,10 +14,5 @@ namespace osu.Framework.Design.CodeEditor
         {
             Text.Value = initialValue;
         }
-
-        public void Insert(int startIndex, string value)
-        {
-            Text.Value = Text.Value.Insert(startIndex, value);
-        }
     }
 }

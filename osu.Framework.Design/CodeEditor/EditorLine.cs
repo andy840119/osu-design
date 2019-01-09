@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Text.RegularExpressions;
 using osu.Framework.Configuration;
 
@@ -10,64 +11,56 @@ namespace osu.Framework.Design.CodeEditor
 
         public BindableList<EditorWord> Words { get; } = new BindableList<EditorWord>();
 
+        public string Text => string.Concat(Words.Select(w => w.Text.Value));
+
         static readonly Regex _splitRegex = new Regex(@"(?<= )", RegexOptions.Compiled);
 
         public void Insert(int startIndex, string value)
         {
-            // Ensure startIndex is valid
             if (startIndex < 0 || startIndex >= Length)
                 throw new ArgumentOutOfRangeException(nameof(startIndex));
             if (string.IsNullOrEmpty(value))
                 return;
 
-            for (var i = 0; i < Words.Count; i++)
+            var parts = _splitRegex.Split(Text.Insert(startIndex, value));
+
+            for (var i = 0; i < parts.Length; i++)
             {
-                var word = Words[i];
+                var part = parts[i];
 
-                if (startIndex >= word.Length)
-                {
-                    startIndex -= word.Length;
-                    continue;
-                }
-
-                var valueParts = _splitRegex.Split(value);
-
-                // Inserting at the begging
-                if (startIndex == 0)
-                {
-                    for (var j = 0; j < valueParts.Length - 1; j++)
-                        Words.Insert(i + j, new EditorWord(valueParts[j]));
-
-                    word.Insert(0, valueParts[valueParts.Length - 1]);
-                }
-
-                // Inserting in the middle
+                if (Words.Count == i)
+                    Words.Add(new EditorWord(part));
                 else
-                {
-
-                }
-
-                var valuePartIndex = 0;
-
-                if (!word.Text.Value.EndsWith(' '))
-                    word.Insert(startIndex, valueParts[valuePartIndex++]);
-
-                var j = 1;
-
-                for (; valuePartIndex < valueParts.Length - 1; j++)
-                    Words.Insert(i + j, new EditorWord(valueParts[valuePartIndex++]));
-
-                if (valuePartIndex == valueParts.Length - 1)
-                {
-                    if (valueParts[valuePartIndex].EndsWith(' '))
-                        Words.Insert(i + j, new EditorWord(valueParts[valuePartIndex]));
-                    else
-                        Words[i + j].Insert(0, valueParts[valuePartIndex]);
-                }
-
-                Length += value.Length;
-                break;
+                    Words[i].Text.Value = part;
             }
+
+            Length += value.Length;
+        }
+
+        public void Remove(int startIndex, int count)
+        {
+            if (startIndex < 0 || startIndex >= Length)
+                throw new ArgumentOutOfRangeException(nameof(startIndex));
+            if (count < 0 || startIndex + count >= Length)
+                throw new ArgumentOutOfRangeException(nameof(count));
+
+            if (count == 0)
+                return;
+
+            var parts = _splitRegex.Split(Text.Remove(startIndex, count));
+
+            for (var i = 0; i < parts.Length; i++)
+            {
+                var part = parts[i];
+
+                Words[i].Text.Value = part;
+            }
+
+            // Remove redundant words
+            while (Words.Count != parts.Length)
+                Words.RemoveAt(parts.Length);
+
+            Length -= count;
         }
     }
 }
