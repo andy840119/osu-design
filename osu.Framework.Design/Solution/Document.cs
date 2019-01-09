@@ -36,6 +36,9 @@ namespace osu.Framework.Design.Solution
         public Stream OpenRead() => File.OpenRead();
         public Stream OpenWrite() => File.OpenWrite();
 
+        public TextReader OpenReader() => new StreamReader(OpenRead());
+        public TextWriter OpenWriter() => new StreamWriter(OpenWrite());
+
         public DocumentType Type
         {
             get
