@@ -48,11 +48,11 @@ namespace osu.Framework.Design.Designer
 
             if (e == null)
             {
-                _flow.FadeOut(30);
+                this.FadeOut(30);
                 return;
             }
             else
-                _flow.FadeIn(200);
+                this.FadeIn(200);
 
             _flow.AddText($"{e.Message}\n", t =>
             {
