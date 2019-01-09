@@ -4,11 +4,14 @@ using System.IO;
 using System.IO.Abstractions;
 using System.Linq;
 using osu.Framework.Configuration;
+using osu.Framework.Threading;
 
 namespace osu.Framework.Design.Solution
 {
     public class Workspace : IDisposable
     {
+        public readonly Scheduler Scheduler = new Scheduler();
+
         public Bindable<DirectoryInfoBase> Directory { get; } = new Bindable<DirectoryInfoBase>();
         public BindableList<Document> Documents { get; } = new BindableList<Document>();
         public Bindable<Document> CurrentDocument { get; } = new Bindable<Document>();
@@ -53,14 +56,17 @@ namespace osu.Framework.Design.Solution
 
         void handleCreated(object sender, FileSystemEventArgs e)
         {
-            var document = new Document(this, Directory.Value.FileSystem.FileInfo.FromFileName(e.FullPath));
+            Scheduler.Add(() =>
+            {
+                var document = new Document(this, Directory.Value.FileSystem.FileInfo.FromFileName(e.FullPath));
 
-            // TODO: Add in sorted order, once BinarySearch is implemented in BindableList
-            // var index = Files.BinarySearch(file);
-            // if (index < 0) index = ~index;
-            // Files.Insert(index, file);
+                // TODO: Add in sorted order, once BinarySearch is implemented in BindableList
+                // var index = Files.BinarySearch(file);
+                // if (index < 0) index = ~index;
+                // Files.Insert(index, file);
 
-            Documents.Add(document);
+                Documents.Add(document);
+            });
         }
 
         void handleChanged(object sender, FileSystemEventArgs e)
@@ -68,14 +74,20 @@ namespace osu.Framework.Design.Solution
             if (e.FullPath != CurrentDocument.Value?.File.FullName)
                 return;
 
-            var last = CurrentDocument.Value;
-            CurrentDocument.Value = null;
-            CurrentDocument.Value = last;
+            Scheduler.Add(() =>
+            {
+                var last = CurrentDocument.Value;
+                CurrentDocument.Value = null;
+                CurrentDocument.Value = last;
+            });
         }
 
         void handleDeleted(object sender, FileSystemEventArgs e)
         {
-            Documents.RemoveAll(d => d.File.FullName == e.FullPath);
+            Scheduler.Add(() =>
+            {
+                Documents.RemoveAll(d => d.File.FullName == e.FullPath);
+            });
         }
 
         public void Dispose()

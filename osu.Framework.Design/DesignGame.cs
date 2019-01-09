@@ -51,6 +51,14 @@ namespace osu.Framework.Design
             );
         }
 
+        protected override void Update()
+        {
+            base.Update();
+
+            // We need to update the workspace manually because all filesystem events are scheduled
+            _workspace.Scheduler.Update();
+        }
+
         DrawSizePreservingFillContainer _content;
         Screen _rootScreen;
 
