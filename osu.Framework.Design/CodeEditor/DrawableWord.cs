@@ -16,6 +16,7 @@ namespace osu.Framework.Design.CodeEditor
 
             FixedWidth = true;
             Shadow = true;
+            Font = "Consolas";
         }
     }
 }
