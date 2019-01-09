@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using osu.Framework.Allocation;
 using osu.Framework.Configuration;
 using osu.Framework.Design.Markup;
@@ -90,8 +89,7 @@ namespace osu.Framework.Design.Designer
                         // Read and parse markup
                         DrawableData data;
 
-                        using (var stream = doc.OpenRead())
-                        using (var reader = new StreamReader(stream))
+                        using (var reader = doc.OpenReader())
                             data = new MarkupReader().Read(reader);
 
                         // Create drawable from markup
