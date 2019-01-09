@@ -39,8 +39,11 @@ namespace osu.Framework.Design
         [BackgroundDependencyLoader]
         void load()
         {
-            // Load textures
             Resources.AddStore(new NamespacedResourceStore<byte[]>(new DllResourceStore("osu.Framework.Design.dll"), "Resources"));
+
+            // Load fonts
+            var fonts = new FontStore(new GlyphStore(Resources, "Fonts/Consolas"));
+            _dependencies.Cache(fonts);
 
             // Global workspace
             _dependencies.CacheAs<IFileSystem>(_fileSystem = new FileSystem());
