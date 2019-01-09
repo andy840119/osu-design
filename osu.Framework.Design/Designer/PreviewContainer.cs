@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using osu.Framework.Allocation;
 using osu.Framework.Configuration;
@@ -11,16 +12,29 @@ namespace osu.Framework.Design.Designer
 {
     public class PreviewContainer : Container
     {
+        readonly ParserErrorDisplay _errorDisplay;
         readonly Container _content;
 
         protected override Container<Drawable> Content => _content;
 
         public PreviewContainer()
         {
-            InternalChild = _content = new Container
+            InternalChildren = new Drawable[]
             {
-                RelativeSizeAxes = Axes.Both
+                _errorDisplay = new ParserErrorDisplay
+                {
+                    RelativeSizeAxes = Axes.Both,
+                    Height = 0.5f,
+                    Anchor = Anchor.BottomLeft,
+                    Origin = Anchor.BottomLeft
+                },
+                _content = new Container
+                {
+                    RelativeSizeAxes = Axes.Both
+                }
             };
+
+            _error = _errorDisplay.Current.GetBoundCopy();
         }
 
         Bindable<Document> _document;
@@ -33,6 +47,7 @@ namespace osu.Framework.Design.Designer
         }
 
         ScheduledDelegate _updateTask;
+        Bindable<Exception> _error;
 
         public double UpdateDebounceMilliseconds { get; set; } = 600;
 
@@ -60,9 +75,12 @@ namespace osu.Framework.Design.Designer
                         Child = data.CreateDrawable();
 
                         _content.FadeIn(30);
+
+                        _error.Value = null;
                     }
-                    catch
+                    catch (Exception e)
                     {
+                        _error.Value = e;
                     }
                 },
                 timeUntilRun: UpdateDebounceMilliseconds
