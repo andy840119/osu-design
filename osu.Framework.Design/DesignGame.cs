@@ -5,6 +5,7 @@ using osu.Framework.Configuration;
 using osu.Framework.Design.Designer;
 using osu.Framework.Design.Solution;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.IO.Stores;
 using osu.Framework.Platform;
 using osu.Framework.Screens;
 using osuTK;
@@ -38,7 +39,10 @@ namespace osu.Framework.Design
         [BackgroundDependencyLoader]
         void load()
         {
-            // Cache dependencies
+            // Load textures
+            Resources.AddStore(new NamespacedResourceStore<byte[]>(new DllResourceStore("osu.Framework.Design.dll"), "Resources"));
+
+            // Global workspace
             _dependencies.CacheAs<IFileSystem>(_fileSystem = new FileSystem());
             _dependencies.Cache(_workspace = new Workspace());
 
