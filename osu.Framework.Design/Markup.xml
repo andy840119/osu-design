@@ -1,2 +1,7 @@
-<fx:SpriteText xmlns:fx="osu.Framework:*">
-</fx:SpriteText>
+<fx:Container id="MyContainer" RelativeSizeAxes="Both" 
+    xmlns:fx="osu.Framework:*"
+    xmlns:local = "osu.Framework.Design:*" Width="500">
+    <fx:Container RelativeSizeAxes="Both">
+        <fx:Box RelativeSizeAxes="Both" Colour="#ff22ff"/>
+    </fx:Container>
+</fx:Container>

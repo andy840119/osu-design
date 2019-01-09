@@ -1,3 +1,4 @@
+using osu.Framework.Design.CodeEditor;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Screens;
@@ -8,6 +9,7 @@ namespace osu.Framework.Design.Designer
     {
         readonly SolutionBrowser _browser;
         readonly PreviewContainer _preview;
+        readonly DrawableEditor _editor;
 
         public WorkspaceScreen()
         {
@@ -25,7 +27,14 @@ namespace osu.Framework.Design.Designer
                     Anchor = Anchor.TopLeft,
                     Origin = Anchor.TopLeft
                 },
-                _preview = new PreviewContainer
+                // _preview = new PreviewContainer
+                // {
+                //     RelativeSizeAxes = Axes.Both,
+                //     Width = 0.8f,
+                //     Anchor = Anchor.TopRight,
+                //     Origin = Anchor.TopRight
+                // },
+                _editor = new DrawableEditor
                 {
                     RelativeSizeAxes = Axes.Both,
                     Width = 0.8f,
@@ -33,6 +42,8 @@ namespace osu.Framework.Design.Designer
                     Origin = Anchor.TopRight
                 }
             };
+
+            _editor.Insert(0, "test hello");
         }
     }
 }
