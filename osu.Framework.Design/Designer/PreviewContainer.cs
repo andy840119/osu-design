@@ -30,7 +30,8 @@ namespace osu.Framework.Design.Designer
                 },
                 _content = new Container
                 {
-                    RelativeSizeAxes = Axes.Both
+                    RelativeSizeAxes = Axes.Both,
+                    Masking = true
                 }
             };
 
