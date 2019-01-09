@@ -47,6 +47,45 @@ namespace osu.Framework.Design.CodeEditor
             Length += value.Length;
         }
 
+        public void InsertLine(int index)
+        {
+            if (index < 0 || index > Length)
+                throw new ArgumentOutOfRangeException(nameof(index));
+
+            if (Lines.Count == 0)
+            {
+                Lines.Add(new EditorLine());
+                return;
+            }
+
+            for (var i = 0; i < Lines.Count; i++)
+            {
+                var line = Lines[i];
+
+                if (index > line.Length)
+                {
+                    index -= line.Length;
+                    continue;
+                }
+
+                if (index == 0)
+                    Lines.Insert(i, new EditorLine());
+                else if (index == line.Length - 1)
+                    Lines.Insert(i + 1, new EditorLine());
+                else
+                {
+                    // Break line
+                    var nextLine = new EditorLine();
+                    Lines.Add(nextLine);
+
+                    nextLine.Insert(0, line.Text.Substring(index));
+                    line.Remove(index, line.Length - index);
+                }
+
+                break;
+            }
+        }
+
         public void Remove(int startIndex, int count)
         {
             if (startIndex < 0 || startIndex > Length)

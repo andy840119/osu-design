@@ -128,6 +128,9 @@ namespace osu.Framework.Design.CodeEditor
             }
         }
 
+        public void AdvanceCaret(int count = 1) => CaretPosition.Value = Math.Min(CaretPosition.Value + count, Model.Length);
+        public void RetreatCaret(int count = 1) => CaretPosition.Value = Math.Max(CaretPosition.Value - count, 0);
+
         protected override bool OnKeyDown(KeyDownEvent e)
         {
             base.OnKeyDown(e);
@@ -135,17 +138,22 @@ namespace osu.Framework.Design.CodeEditor
             switch (e.Key)
             {
                 case Key.Left:
-                    CaretPosition.Value = Math.Max(CaretPosition.Value - 1, 0);
+                    RetreatCaret();
                     break;
                 case Key.Right:
-                    CaretPosition.Value = Math.Min(CaretPosition.Value + 1, Model.Length);
+                    AdvanceCaret();
                     break;
                 case Key.BackSpace:
                     if (CaretPosition.Value > 0)
                     {
                         Model.Remove(CaretPosition.Value - 1, 1);
-                        CaretPosition.Value--;
+                        RetreatCaret();
                     }
+                    break;
+                case Key.Enter:
+                case Key.KeypadEnter:
+                    Model.InsertLine(Math.Clamp(CaretPosition.Value, 0, Model.Length));
+                    AdvanceCaret();
                     break;
                 default:
                     return false;
