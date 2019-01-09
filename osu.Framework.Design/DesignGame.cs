@@ -69,7 +69,7 @@ namespace osu.Framework.Design
             // Aspect ratio container
             Child = _content = new DrawSizePreservingFillContainer
             {
-                TargetDrawSize = new Vector2(1600, 1200),
+                TargetDrawSize = new Vector2(1440, 1080),
                 Strategy = DrawSizePreservationStrategy.Minimum
             };
 
