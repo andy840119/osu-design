@@ -83,7 +83,7 @@ namespace osu.Framework.Design.CodeEditor
             // For faster removal performance, convert to an array
             var modelsArray = models.ToArray();
 
-            _flow.RemoveAll(l => Array.IndexOf(modelsArray, l.Model) != 0);
+            _flow.RemoveAll(l => Array.IndexOf(modelsArray, l.Model) != -1);
 
             updateLineDepths();
         }

@@ -33,7 +33,7 @@ namespace osu.Framework.Design.CodeEditor
             // For faster removal performance, convert to an array
             var modelsArray = models.ToArray();
 
-            RemoveAll(w => Array.IndexOf(modelsArray, w.Model) != 0);
+            RemoveAll(w => Array.IndexOf(modelsArray, w.Model) != -1);
 
             updateWordDepths();
         }
