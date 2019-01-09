@@ -14,25 +14,19 @@ namespace osu.Framework.Design.Designer
             {
                 _browser = new SolutionBrowser
                 {
-                    RelativeSizeAxes = Axes.Y,
-                    Width = 200,
+                    RelativeSizeAxes = Axes.Both,
+                    Width = 0.2f,
                     Anchor = Anchor.TopLeft,
                     Origin = Anchor.TopLeft
                 },
                 _preview = new PreviewContainer
                 {
-                    RelativeSizeAxes = Axes.Y,
+                    RelativeSizeAxes = Axes.Both,
+                    Width = 0.8f,
                     Anchor = Anchor.TopRight,
                     Origin = Anchor.TopRight
                 }
             };
-        }
-
-        protected override void Update()
-        {
-            base.Update();
-
-            _preview.Width = DrawWidth - _browser.DrawWidth;
         }
     }
 }
