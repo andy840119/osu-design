@@ -1,6 +1,6 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using osu.Framework.Allocation;
 using osu.Framework.Configuration;
 using osu.Framework.Graphics;
@@ -15,6 +15,8 @@ namespace osu.Framework.Design.CodeEditor
 {
     public class DrawableEditor : CompositeDrawable
     {
+        public EditorModel Model { get; }
+
         readonly ScrollContainer _scroll;
         readonly FillFlowContainer<DrawableLine> _flow;
         readonly DrawableCaret _caret;
@@ -25,6 +27,10 @@ namespace osu.Framework.Design.CodeEditor
 
         public DrawableEditor()
         {
+            Model = new EditorModel();
+            Model.Lines.ItemsAdded += handleLinesAdded;
+            Model.Lines.ItemsRemoved += handleLinesRemoved;
+
             InternalChildren = new Drawable[]
             {
                 _scroll = new ScrollContainer(Direction.Vertical)
@@ -44,9 +50,7 @@ namespace osu.Framework.Design.CodeEditor
                             {
                                 RelativeSizeAxes = Axes.X,
                                 AutoSizeAxes = Axes.Y,
-                                Direction = FillDirection.Vertical,
-                                // Need one line to start with
-                                Child = new DrawableLine()
+                                Direction = FillDirection.Vertical
                             },
                             _caret = new DrawableCaret()
                         }
@@ -66,6 +70,30 @@ namespace osu.Framework.Design.CodeEditor
             _textInput.Activate(this);
         }
 
+        void handleLinesAdded(IEnumerable<EditorLine> models)
+        {
+            foreach (var model in models)
+                _flow.Add(new DrawableLine(model));
+
+            updateLineDepths();
+        }
+
+        void handleLinesRemoved(IEnumerable<EditorLine> models)
+        {
+            // For faster removal performance, convert to an array
+            var modelsArray = models.ToArray();
+
+            _flow.RemoveAll(l => Array.IndexOf(modelsArray, l.Model) != 0);
+
+            updateLineDepths();
+        }
+
+        void updateLineDepths()
+        {
+            foreach (var line in _flow)
+                _flow.ChangeChildDepth(line, Model.Lines.IndexOf(line.Model));
+        }
+
         void handleCaretMove(int index)
         {
             for (var i = 0; i < _flow.Count; i++)
@@ -73,9 +101,9 @@ namespace osu.Framework.Design.CodeEditor
                 var line = _flow[i];
 
                 // Find line that contains index
-                if (index > line.Length)
+                if (index > line.Model.Length)
                 {
-                    index -= line.Length;
+                    index -= line.Model.Length;
                     continue;
                 }
 
@@ -90,70 +118,14 @@ namespace osu.Framework.Design.CodeEditor
         {
             base.Update();
 
+            // Handle text input
             var pending = _textInput.GetPendingText();
 
             if (!string.IsNullOrEmpty(pending))
             {
-                Insert(pending);
+                Model.Insert(CaretPosition.Value, pending);
                 CaretPosition.Value += pending.Length;
             }
-        }
-
-        public int Length { get; private set; }
-
-        static readonly Regex _splitRegex = new Regex(@"(?<=\n)", RegexOptions.Compiled);
-
-        public void Insert(string text) => Insert(CaretPosition.Value, text);
-        public void Insert(int startIndex, string value)
-        {
-            if (string.IsNullOrEmpty(value))
-                return;
-
-            // Ensure startIndex is valid
-            startIndex = Math.Clamp(startIndex, 0, Length);
-
-            var lines = _flow.ToList();
-
-            for (var i = 0; i < lines.Count; i++)
-            {
-                var line = lines[i];
-
-                if (value != null)
-                {
-                    // Find line that contains startIndex
-                    if (startIndex > line.Length)
-                    {
-                        startIndex -= line.Length;
-                        continue;
-                    }
-
-                    // Split value by lines
-                    var valueLines = _splitRegex.Split(value);
-
-                    // First part appends to our matching line
-                    line.Insert(startIndex, valueLines[i]);
-
-                    // All other parts are added as new words
-                    for (var j = 1; j < valueLines.Length; j++)
-                    {
-                        var valueLine = new DrawableLine(valueLines[j]);
-                        lines.Insert(i + j, valueLine);
-
-                        _flow.Add(valueLine);
-                    }
-
-                    Length += value.Length;
-                    value = null;
-                }
-
-                // Update depth to reflect the insertion
-                _flow.ChangeChildDepth(line, i);
-            }
-        }
-
-        public void Remove(int count) => Remove(CaretPosition.Value, count);
-        public void Remove(int startIndex, int count)
-        {
         }
 
         protected override bool OnKeyDown(KeyDownEvent e)
@@ -169,7 +141,7 @@ namespace osu.Framework.Design.CodeEditor
                     CaretPosition.Value++;
                     break;
                 case Key.BackSpace:
-                    Remove(CaretPosition.Value - 1, 1);
+                    Model.Remove(CaretPosition.Value - 1, 1);
                     CaretPosition.Value--;
                     break;
                 default:

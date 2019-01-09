@@ -43,7 +43,7 @@ namespace osu.Framework.Design.Designer
                 }
             };
 
-            _editor.Insert(0, "test hello");
+            _editor.Model.Insert(0, "test hello");
         }
     }
 }
