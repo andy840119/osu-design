@@ -17,7 +17,7 @@ namespace osu.Framework.Design.CodeEditor
 
         public void Insert(int startIndex, string value)
         {
-            if (startIndex < 0 || startIndex >= Length)
+            if (startIndex < 0 || startIndex > Length)
                 throw new ArgumentOutOfRangeException(nameof(startIndex));
             if (string.IsNullOrEmpty(value))
                 return;
@@ -39,9 +39,9 @@ namespace osu.Framework.Design.CodeEditor
 
         public void Remove(int startIndex, int count)
         {
-            if (startIndex < 0 || startIndex >= Length)
+            if (startIndex < 0 || startIndex > Length)
                 throw new ArgumentOutOfRangeException(nameof(startIndex));
-            if (count < 0 || startIndex + count >= Length)
+            if (count < 0 || startIndex + count > Length)
                 throw new ArgumentOutOfRangeException(nameof(count));
 
             if (count == 0)
