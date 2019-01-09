@@ -36,7 +36,8 @@ namespace osu.Framework.Design.Designer
                     {
                         RelativeSizeAxes = Axes.X,
                         AutoSizeAxes = Axes.Y,
-                        ParagraphSpacing = 1
+                        ParagraphSpacing = 1,
+                        Padding = new MarginPadding(5)
                     }
                 }
             };
