@@ -1,7 +1,9 @@
 using System;
 using osu.Framework.Configuration;
+using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Graphics.Shapes;
 using osuTK.Graphics;
 
 namespace osu.Framework.Design.Designer
@@ -17,17 +19,25 @@ namespace osu.Framework.Design.Designer
             Current = new Bindable<Exception>();
             Current.ValueChanged += handleChange;
 
-            InternalChild = new ScrollContainer(Direction.Vertical)
+            InternalChildren = new Drawable[]
             {
-                RelativeSizeAxes = Axes.Both,
-                Child = _flow = new TextFlowContainer(text =>
+                new Box
                 {
-                    text.TextSize = 20;
-                })
+                    RelativeSizeAxes = Axes.Both,
+                    Colour = Color4.Black.Opacity(0.8f)
+                },
+                new ScrollContainer(Direction.Vertical)
                 {
-                    RelativeSizeAxes = Axes.X,
-                    AutoSizeAxes = Axes.Y,
-                    ParagraphSpacing = 1
+                    RelativeSizeAxes = Axes.Both,
+                    Child = _flow = new TextFlowContainer(text =>
+                    {
+                        text.TextSize = 20;
+                    })
+                    {
+                        RelativeSizeAxes = Axes.X,
+                        AutoSizeAxes = Axes.Y,
+                        ParagraphSpacing = 1
+                    }
                 }
             };
         }
