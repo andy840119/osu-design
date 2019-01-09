@@ -65,11 +65,12 @@ namespace osu.Framework.Design.Designer
 
         void handleChange(Document doc)
         {
+            _content.FadeTo(0.2f, 200);
+
             if (doc?.Type != DocumentType.Markup)
             {
                 _statusText.Text = "Not markup";
                 _statusText.FadeColour(Color4.White, 200);
-                _content.FadeTo(0.2f, 200);
                 return;
             }
 
