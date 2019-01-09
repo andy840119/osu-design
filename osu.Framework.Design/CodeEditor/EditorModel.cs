@@ -27,6 +27,9 @@ namespace osu.Framework.Design.CodeEditor
             if (string.IsNullOrEmpty(value))
                 return;
 
+            if (Lines.Count == 0)
+                Lines.Add(new EditorLine());
+
             for (var i = 0; i < Lines.Count; i++)
             {
                 var line = Lines[i];
