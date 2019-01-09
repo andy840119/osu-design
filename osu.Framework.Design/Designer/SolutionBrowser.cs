@@ -262,6 +262,9 @@ namespace osu.Framework.Design.Designer
                         case ".vbproj": tex = "file_type_vbproj"; break;
                         case ".avi":
                         case ".mp4": tex = "file_type_video"; break;
+                        case ".jpg":
+                        case ".png":
+                        case ".tiff": tex = "file_type_image"; break;
                         case ".xoml": tex = "file_type_view"; break;
                         case ".xml": tex = "file_type_xml"; break;
                         default: tex = "default_file"; break;
