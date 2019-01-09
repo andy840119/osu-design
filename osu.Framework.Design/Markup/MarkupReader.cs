@@ -14,7 +14,7 @@ namespace osu.Framework.Design.Markup
     {
         public readonly Dictionary<string, Dictionary<string, Type>> ImportedTypes = new Dictionary<string, Dictionary<string, Type>>();
 
-        public DrawableData Parse(TextReader reader)
+        public DrawableData Read(TextReader reader)
         {
             var doc = XDocument.Load(reader);
             var root = doc.Root;

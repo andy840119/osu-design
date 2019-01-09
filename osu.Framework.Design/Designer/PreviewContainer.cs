@@ -54,7 +54,7 @@ namespace osu.Framework.Design.Designer
 
                         using (var stream = doc.OpenRead())
                         using (var reader = new StreamReader(stream))
-                            data = new MarkupReader().Parse(reader);
+                            data = new MarkupReader().Read(reader);
 
                         // Create drawable from markup
                         Child = data.CreateDrawable();

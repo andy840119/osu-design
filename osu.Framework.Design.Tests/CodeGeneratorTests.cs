@@ -47,7 +47,7 @@ namespace osu.Framework.Design.Tests
             DrawableData d;
 
             using (var reader = new StringReader(data))
-                d = parser.Parse(reader);
+                d = parser.Read(reader);
 
             // Generate code
             var workspace = new AdhocWorkspace();

@@ -27,7 +27,7 @@ namespace osu.Framework.Design.Tests
             DrawableData d;
 
             using (var reader = new StringReader(data))
-                d = parser.Parse(reader);
+                d = parser.Read(reader);
 
             Assert.IsTrue(parser.ImportedTypes.ContainsKey("osu.Framework:*"), "parser did not load fx lib");
             Assert.IsTrue(parser.ImportedTypes.ContainsKey("osu.Framework.Design:*"), "parser did not load local lib");
