@@ -11,7 +11,7 @@ namespace osu.Framework.Design.CodeEditor
         public DrawableWord(EditorWord model)
         {
             Model = model;
-            Model.Text.BindTo(Current);
+            Current.BindTo(Model.Text);
             Model.Colour.ValueChanged += c => this.FadeColour(c, 200);
 
             FixedWidth = true;
