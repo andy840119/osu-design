@@ -59,6 +59,8 @@ namespace osu.Framework.Design.CodeEditor
             };
 
             CaretPosition.ValueChanged += handleCaretMove;
+
+            handleLinesAdded(Model.Lines);
         }
 
         ITextInputSource _textInput;
@@ -107,10 +109,10 @@ namespace osu.Framework.Design.CodeEditor
                     continue;
                 }
 
-                _caret.MoveTo(line.ToSpaceOfOtherDrawable(
-                    new Vector2(9, 0) * index,
-                    _flow
-                ), 100);
+                var y = i * 20;
+                var x = index * 8;
+
+                _caret.MoveTo(new Vector2(x, y), 200, Easing.Out);
             }
         }
 

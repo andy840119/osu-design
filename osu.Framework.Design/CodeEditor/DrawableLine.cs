@@ -18,6 +18,8 @@ namespace osu.Framework.Design.CodeEditor
 
             AutoSizeAxes = Axes.Both;
             Direction = FillDirection.Horizontal;
+
+            handleWordsAdded(model.Words);
         }
 
         void handleWordsAdded(IEnumerable<EditorWord> models)
