@@ -183,6 +183,12 @@ namespace osu.Framework.Design.CodeEditor
                         RetreatCaret();
                     }
                     break;
+                case Key.Delete:
+                    if (CaretPosition.Value < Model.Length - 1)
+                    {
+                        Model.Remove(CaretPosition.Value, 1);
+                    }
+                    break;
                 case Key.Enter:
                 case Key.KeypadEnter:
                     Model.Insert(Math.Clamp(CaretPosition.Value, 0, Model.Length), "\n");
