@@ -19,7 +19,6 @@ namespace osu.Framework.Design.Tests
         <_RelativeSizeAxes>Both</_RelativeSizeAxes>
         <_Colour>#00ff00</_Colour>
     </fx:Box>
-    <local:DesignGame />
 </fx:Screen>";
 
             var parser = new MarkupReader();
