@@ -66,6 +66,7 @@ namespace osu.Framework.Design.Designer
         void handleChange(Document doc)
         {
             _content.FadeTo(0.2f, 200);
+            _error.Value = null;
 
             if (doc?.Type != DocumentType.Markup)
             {
@@ -97,7 +98,6 @@ namespace osu.Framework.Design.Designer
 
                         _statusText.Text = "Waiting...";
                         _statusText.FadeColour(Color4.White, 200);
-                        _error.Value = null;
                     }
                     catch (Exception e)
                     {
