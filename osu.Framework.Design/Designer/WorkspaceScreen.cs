@@ -1,4 +1,5 @@
 using osu.Framework.Graphics;
+using osu.Framework.Graphics.Shapes;
 using osu.Framework.Screens;
 
 namespace osu.Framework.Design.Designer
@@ -12,6 +13,11 @@ namespace osu.Framework.Design.Designer
         {
             Children = new Drawable[]
             {
+                new Box
+                {
+                    RelativeSizeAxes = Axes.Both,
+                    Colour = DesignerColours.Editor
+                },
                 _browser = new SolutionBrowser
                 {
                     RelativeSizeAxes = Axes.Both,

@@ -9,6 +9,7 @@ using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Input.Events;
+using osu.Framework.MathUtils;
 using osuTK.Graphics;
 
 namespace osu.Framework.Design.Designer
@@ -21,6 +22,11 @@ namespace osu.Framework.Design.Designer
         {
             InternalChildren = new Drawable[]
             {
+                new Box
+                {
+                    RelativeSizeAxes = Axes.Both,
+                    Colour = DesignerColours.Side
+                },
                 new ScrollContainer(Direction.Vertical)
                 {
                     RelativeSizeAxes = Axes.Both,
@@ -51,18 +57,19 @@ namespace osu.Framework.Design.Designer
             foreach (var doc in docs)
             {
                 Container<Item> folderFlow = _flow;
+                var level = 0;
 
                 foreach (var folder in doc.Folders)
                 {
                     var flow = folderFlow.FirstOrDefault(i => i.Name == folder.Name);
 
                     if (flow == null)
-                        folderFlow.Add(flow = new Item(folder.Name, null));
+                        folderFlow.Add(flow = new Item(folder.Name, null, level++));
 
                     folderFlow = flow;
                 }
 
-                folderFlow.Add(new Item(doc.Name, doc));
+                folderFlow.Add(new Item(doc.Name, doc, level));
             }
         }
 
@@ -75,14 +82,27 @@ namespace osu.Framework.Design.Designer
             readonly Container<Item> _content;
             readonly Drawable _head;
 
-            readonly Drawable _background;
+            readonly Drawable _hover;
             readonly Drawable _highlight;
+
+            readonly Drawable _hierarchyMarker;
 
             protected override Container<Item> Content => _content;
 
             readonly Document _doc;
 
-            public Item(string name, Document doc)
+            static readonly Color4[] folderColours = new[]
+            {
+                Color4.Red,
+                Color4.Orange,
+                Color4.Yellow,
+                Color4.Green,
+                Color4.Blue,
+                Color4.White,
+                Color4.Purple
+            };
+
+            public Item(string name, Document doc, int level)
             {
                 Name = name;
                 _doc = doc;
@@ -90,56 +110,79 @@ namespace osu.Framework.Design.Designer
                 RelativeSizeAxes = Axes.X;
                 AutoSizeAxes = Axes.Y;
 
-                InternalChild = new FillFlowContainer
+                InternalChildren = new Drawable[]
                 {
-                    RelativeSizeAxes = Axes.X,
-                    AutoSizeAxes = Axes.Y,
-                    Direction = FillDirection.Vertical,
-                    Children = new Drawable[]
+                    _hierarchyMarker = new Box
                     {
-                        _head = new Container
+                        RelativeSizeAxes = Axes.Y,
+                        Width = 2,
+                        Colour = folderColours[level % folderColours.Length],
+                        Alpha = 0
+                    },
+                    new FillFlowContainer
+                    {
+                        RelativeSizeAxes = Axes.X,
+                        AutoSizeAxes = Axes.Y,
+                        Direction = FillDirection.Vertical,
+                        Children = new Drawable[]
                         {
-                            RelativeSizeAxes = Axes.X,
-                            AutoSizeAxes = Axes.Y,
-                            Children = new Drawable[]
+                            _head = new Container
                             {
-                                _highlight = new Box
+                                RelativeSizeAxes = Axes.X,
+                                AutoSizeAxes = Axes.Y,
+                                Children = new Drawable[]
                                 {
-                                    RelativeSizeAxes = Axes.Both,
-                                    Colour = Color4.Green.Opacity(0.5f),
-                                    Alpha = 0
-                                },
-                                _background = new Box
-                                {
-                                    RelativeSizeAxes = Axes.Both,
-                                    Colour = Color4.White.Opacity(0.2f),
-                                    Alpha = 0
-                                },
-                                new FillFlowContainer
-                                {
-                                    RelativeSizeAxes = Axes.X,
-                                    AutoSizeAxes = Axes.Y,
-                                    Direction = FillDirection.Horizontal,
-                                    Padding = new MarginPadding(3),
-                                    Children = new Drawable[]
+                                    _highlight = new Container
                                     {
-                                        new SpriteText
+                                        RelativeSizeAxes = Axes.Both,
+                                        Masking = true,
+                                        CornerRadius = 5,
+                                        Alpha = 0,
+                                        Child = new Box
                                         {
-                                            Text = Name,
-                                            TextSize = 20
+                                            RelativeSizeAxes = Axes.Both,
+                                            Colour = DesignerColours.Highlight.Opacity(0.6f)
+                                        }
+                                    },
+                                    _hover = new Container
+                                    {
+                                        RelativeSizeAxes = Axes.Both,
+                                        Masking = true,
+                                        CornerRadius = 5,
+                                        Alpha = 0,
+                                        Child = new Box
+                                        {
+                                            RelativeSizeAxes = Axes.Both,
+                                            Colour = Color4.White.Opacity(0.1f)
+                                        }
+                                    },
+                                    new FillFlowContainer
+                                    {
+                                        RelativeSizeAxes = Axes.X,
+                                        AutoSizeAxes = Axes.Y,
+                                        Direction = FillDirection.Horizontal,
+                                        Padding = new MarginPadding(3),
+                                        Children = new Drawable[]
+                                        {
+                                            new SpriteText
+                                            {
+                                                Text = Name,
+                                                TextSize = 18,
+                                                Colour = DesignerColours.SideForeground
+                                            }
                                         }
                                     }
                                 }
-                            }
-                        },
-                        _content = new FillFlowContainer<Item>
-                        {
-                            RelativeSizeAxes = Axes.X,
-                            AutoSizeAxes = Axes.Y,
-                            Direction = FillDirection.Vertical,
-                            Padding = new MarginPadding
+                            },
+                            _content = new FillFlowContainer<Item>
                             {
-                                Left = 20
+                                RelativeSizeAxes = Axes.X,
+                                AutoSizeAxes = Axes.Y,
+                                Direction = FillDirection.Vertical,
+                                Padding = new MarginPadding
+                                {
+                                    Left = 18
+                                }
                             }
                         }
                     }
@@ -159,15 +202,21 @@ namespace osu.Framework.Design.Designer
             {
                 base.OnHover(e);
 
-                _background.FadeIn(30);
+                _hover.FadeIn(30);
 
-                return true;
+                if (_doc == null)
+                    _hierarchyMarker.FadeIn(30);
+
+                return _doc == null;
             }
             protected override void OnHoverLost(HoverLostEvent e)
             {
                 base.OnHoverLost(e);
 
-                _background.FadeOut(200);
+                _hover.FadeOut(200);
+
+                if (_doc == null)
+                    _hierarchyMarker.FadeOut(200);
             }
 
             bool _collapsed;

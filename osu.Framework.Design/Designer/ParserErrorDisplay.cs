@@ -31,7 +31,7 @@ namespace osu.Framework.Design.Designer
                     RelativeSizeAxes = Axes.Both,
                     Child = _flow = new TextFlowContainer(text =>
                     {
-                        text.TextSize = 20;
+                        text.TextSize = 18;
                     })
                     {
                         RelativeSizeAxes = Axes.X,
@@ -57,12 +57,12 @@ namespace osu.Framework.Design.Designer
 
             _flow.AddText($"{e.Message}\n", t =>
             {
-                t.Colour = Color4.Red;
-                t.TextSize = 26;
+                t.Colour = DesignerColours.Error;
+                t.TextSize = 24;
             });
             _flow.AddText($"Source: {e.Source}\n", t =>
             {
-                t.Colour = Color4.LightGreen;
+                t.Colour = DesignerColours.Highlight;
             });
             _flow.AddText($"Trace:\n{e.StackTrace}", t =>
             {

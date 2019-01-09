@@ -76,7 +76,7 @@ namespace osu.Framework.Design.Designer
             }
 
             _statusText.Text = "Parsing...";
-            _statusText.FadeColour(Color4.SkyBlue, 200);
+            _statusText.FadeColour(DesignerColours.Highlight, 200);
 
             _updateTask?.Cancel();
             _updateTask = Scheduler.AddDelayed(
@@ -102,7 +102,7 @@ namespace osu.Framework.Design.Designer
                     catch (Exception e)
                     {
                         _statusText.Text = "Error!";
-                        _statusText.FadeColour(Color4.Red, 30);
+                        _statusText.FadeColour(DesignerColours.Error, 30);
 
                         _error.Value = e;
                     }
