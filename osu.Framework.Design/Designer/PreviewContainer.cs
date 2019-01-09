@@ -65,18 +65,21 @@ namespace osu.Framework.Design.Designer
 
         void handleChange(Document doc)
         {
-            _content.FadeTo(0.2f, 200);
-            _error.Value = null;
+            _errorDisplay.FadeOut(30);
 
             if (doc?.Type != DocumentType.Markup)
             {
                 _statusText.Text = "Not markup";
                 _statusText.FadeColour(Color4.White, 200);
+
+                _content.Clear();
                 return;
             }
 
             _statusText.Text = "Parsing...";
             _statusText.FadeColour(DesignerColours.Highlight, 200);
+
+            _content.FadeTo(0.6f, 200);
 
             _updateTask?.Cancel();
             _updateTask = Scheduler.AddDelayed(
@@ -105,6 +108,7 @@ namespace osu.Framework.Design.Designer
                         _statusText.FadeColour(DesignerColours.Error, 30);
 
                         _error.Value = e;
+                        _errorDisplay.FadeIn(200);
                     }
                 },
                 timeUntilRun: UpdateDebounceMilliseconds

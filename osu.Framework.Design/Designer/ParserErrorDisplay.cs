@@ -45,14 +45,6 @@ namespace osu.Framework.Design.Designer
 
         void handleChange(Exception e)
         {
-            if (e == null)
-            {
-                this.FadeOut(30);
-                return;
-            }
-            else
-                this.FadeIn(200);
-
             _flow.Clear(true);
 
             _flow.AddText($"{e.Message}\n", t =>
