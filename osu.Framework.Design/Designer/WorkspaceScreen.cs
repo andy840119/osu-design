@@ -1,4 +1,7 @@
+using osu.Framework.Allocation;
+using osu.Framework.Configuration;
 using osu.Framework.Design.CodeEditor;
+using osu.Framework.Design.Solution;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Screens;
@@ -42,8 +45,24 @@ namespace osu.Framework.Design.Designer
                     Origin = Anchor.TopRight
                 }
             };
+        }
 
-            _editor.Model.Insert(0, "test hello");
+        Bindable<Document> _doc;
+
+        [BackgroundDependencyLoader]
+        void load(Workspace workspace)
+        {
+            _doc = workspace.CurrentDocument;
+            _doc.BindValueChanged(d =>
+            {
+                _editor.Model.Lines.Clear();
+
+                if (d == null)
+                    return;
+
+                using (var reader = d.OpenReader())
+                    _editor.Model.Set(reader.ReadToEnd());
+            });
         }
     }
 }

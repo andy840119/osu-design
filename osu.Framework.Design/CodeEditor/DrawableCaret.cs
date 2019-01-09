@@ -27,11 +27,11 @@ namespace osu.Framework.Design.CodeEditor
         {
             base.LoadComplete();
 
-            // this.FadeIn(30)
-            //     .Delay(500)
-            //     .FadeOut(200)
-            //     .Delay(300)
-            //     .Loop();
+            this.FadeIn(30)
+                .Delay(500)
+                .FadeTo(0.4f, 200)
+                .Delay(300)
+                .Loop();
         }
     }
 }

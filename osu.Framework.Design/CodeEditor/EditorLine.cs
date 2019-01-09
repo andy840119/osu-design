@@ -7,13 +7,16 @@ namespace osu.Framework.Design.CodeEditor
 {
     public class EditorLine
     {
-        public int Length { get; private set; }
+        public int Length => Words.Sum(w => w.Length) + 1;
 
         public BindableList<EditorWord> Words { get; } = new BindableList<EditorWord>();
 
-        public string Text => string.Concat(Words.Select(w => w.Text.Value));
+        public string Text => string.Concat(Words.Select(w => w.Text.Value)) + '\n';
 
-        static readonly Regex _splitRegex = new Regex(@"(?<= )", RegexOptions.Compiled);
+        public EditorLine(string value = "")
+        {
+            Set(value);
+        }
 
         public void Insert(int startIndex, string value)
         {
@@ -22,19 +25,7 @@ namespace osu.Framework.Design.CodeEditor
             if (string.IsNullOrEmpty(value))
                 return;
 
-            var parts = _splitRegex.Split(Text.Insert(startIndex, value));
-
-            for (var i = 0; i < parts.Length; i++)
-            {
-                var part = parts[i];
-
-                if (Words.Count == i)
-                    Words.Add(new EditorWord(part));
-                else
-                    Words[i].Text.Value = part;
-            }
-
-            Length += value.Length;
+            Set(Text.Insert(startIndex, value));
         }
 
         public void Remove(int startIndex, int count)
@@ -47,20 +38,28 @@ namespace osu.Framework.Design.CodeEditor
             if (count == 0)
                 return;
 
-            var parts = _splitRegex.Split(Text.Remove(startIndex, count));
+            Set(Text.Remove(startIndex, count));
+        }
+
+        static readonly Regex _splitRegex = new Regex(@"(?<= )", RegexOptions.Compiled);
+
+        public void Set(string value)
+        {
+            var parts = _splitRegex.Split(value);
 
             for (var i = 0; i < parts.Length; i++)
             {
                 var part = parts[i];
 
-                Words[i].Text.Value = part;
+                if (Words.Count == i)
+                    Words.Add(new EditorWord(part));
+                else
+                    Words[i].Set(part);
             }
 
             // Remove redundant words
             while (Words.Count != parts.Length)
                 Words.RemoveAt(parts.Length);
-
-            Length -= count;
         }
     }
 }

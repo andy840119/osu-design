@@ -7,6 +7,7 @@ using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Input;
 using osu.Framework.Input.Events;
+using osu.Framework.IO.Stores;
 using osu.Framework.Platform;
 using osuTK;
 using osuTK.Input;
@@ -17,9 +18,12 @@ namespace osu.Framework.Design.CodeEditor
     {
         public EditorModel Model { get; }
 
-        readonly ScrollContainer _scroll;
-        readonly FillFlowContainer<DrawableLine> _flow;
-        readonly DrawableCaret _caret;
+        ScrollContainer _scroll;
+        FillFlowContainer<DrawableLine> _flow;
+        DrawableCaret _caret;
+
+        public Bindable<string> Font { get; } = new Bindable<string>("Consolas");
+        public Bindable<float> FontSize { get; } = new Bindable<float>(20);
 
         public Bindable<int> CaretPosition { get; } = new Bindable<int>();
         public Bindable<string> CurrentLine { get; } = new Bindable<string>();
@@ -36,10 +40,10 @@ namespace osu.Framework.Design.CodeEditor
                 _scroll = new ScrollContainer(Direction.Vertical)
                 {
                     RelativeSizeAxes = Axes.Both,
-                    ClampExtension = 0,
-                    DistanceDecayDrag = 0.01,
-                    DistanceDecayScroll = 0.1,
-                    DistanceDecayJump = 0.2,
+                    ClampExtension = 100,
+                    DistanceDecayDrag = 0.008,
+                    DistanceDecayScroll = 0.056,
+                    DistanceDecayJump = 0.056,
                     Child = new Container
                     {
                         RelativeSizeAxes = Axes.X,
@@ -50,7 +54,9 @@ namespace osu.Framework.Design.CodeEditor
                             {
                                 RelativeSizeAxes = Axes.X,
                                 AutoSizeAxes = Axes.Y,
-                                Direction = FillDirection.Vertical
+                                Direction = FillDirection.Vertical,
+                                LayoutEasing = Easing.OutQuint,
+                                LayoutDuration = 200
                             },
                             _caret = new DrawableCaret()
                         }
@@ -58,43 +64,66 @@ namespace osu.Framework.Design.CodeEditor
                 }
             };
 
-            CaretPosition.ValueChanged += handleCaretMove;
-
             handleLinesAdded(Model.Lines);
         }
+
+        DependencyContainer _dependencies;
+        protected override IReadOnlyDependencyContainer CreateChildDependencies(IReadOnlyDependencyContainer parent) =>
+            _dependencies = new DependencyContainer(base.CreateChildDependencies(parent));
 
         ITextInputSource _textInput;
 
         [BackgroundDependencyLoader]
-        void load(GameHost host)
+        void load(GameHost host, FontStore fonts)
         {
             _textInput = host.GetTextInput();
             _textInput.Activate(this);
+
+            // Cache this as dependency for our children only
+            _dependencies.CacheAs(this);
+
+            // Need font store to get fixed width size
+            Font.BindValueChanged(f => fixedWidth = fonts.GetCharacter(f, 'D').DisplayWidth, true);
+
+            // Bind caret event and update it
+            CaretPosition.BindValueChanged(handleCaretMove, true);
         }
 
         void handleLinesAdded(IEnumerable<EditorLine> models)
         {
+            if (LoadState != LoadState.Loaded)
+            {
+                Schedule(() => handleLinesAdded(models));
+                return;
+            }
+
             foreach (var model in models)
                 _flow.Add(new DrawableLine(model));
 
-            updateLineDepths();
+            updateLinePositions();
         }
 
         void handleLinesRemoved(IEnumerable<EditorLine> models)
         {
-            // For faster removal performance, convert to an array
-            var modelsArray = models.ToArray();
+            if (LoadState != LoadState.Loaded)
+            {
+                Schedule(() => handleLinesRemoved(models));
+                return;
+            }
 
-            _flow.RemoveAll(l => Array.IndexOf(modelsArray, l.Model) != -1);
+            foreach (var model in models)
+                _flow.Remove(_flow.First(l => l.Model == model));
 
-            updateLineDepths();
+            updateLinePositions();
         }
 
-        void updateLineDepths()
+        void updateLinePositions()
         {
             foreach (var line in _flow)
-                _flow.ChangeChildDepth(line, Model.Lines.IndexOf(line.Model));
+                _flow.SetLayoutPosition(line, Model.Lines.IndexOf(line.Model));
         }
+
+        float fixedWidth;
 
         void handleCaretMove(int index)
         {
@@ -103,16 +132,17 @@ namespace osu.Framework.Design.CodeEditor
                 var line = _flow[i];
 
                 // Find line that contains index
-                if (index > line.Model.Length)
+                if (index >= line.Model.Length)
                 {
                     index -= line.Model.Length;
                     continue;
                 }
 
-                var y = i * 20;
-                var x = index * 8;
+                var y = i * FontSize.Value;
+                var x = index * fixedWidth * FontSize.Value;
 
-                _caret.MoveTo(new Vector2(x, y), 200, Easing.Out);
+                _caret.MoveTo(new Vector2(x, y), 50, Easing.Out);
+                break;
             }
         }
 
@@ -130,8 +160,9 @@ namespace osu.Framework.Design.CodeEditor
             }
         }
 
-        public void AdvanceCaret(int count = 1) => CaretPosition.Value = Math.Min(CaretPosition.Value + count, Model.Length);
-        public void RetreatCaret(int count = 1) => CaretPosition.Value = Math.Max(CaretPosition.Value - count, 0);
+        public void MoveCaret(int position) => CaretPosition.Value = Math.Clamp(position, 0, Model.Length);
+        public void AdvanceCaret(int count = 1) => MoveCaret(CaretPosition.Value + count);
+        public void RetreatCaret(int count = 1) => MoveCaret(CaretPosition.Value - count);
 
         protected override bool OnKeyDown(KeyDownEvent e)
         {
@@ -154,7 +185,7 @@ namespace osu.Framework.Design.CodeEditor
                     break;
                 case Key.Enter:
                 case Key.KeypadEnter:
-                    Model.InsertLine(Math.Clamp(CaretPosition.Value, 0, Model.Length));
+                    Model.Insert(Math.Clamp(CaretPosition.Value, 0, Model.Length), "\n");
                     AdvanceCaret();
                     break;
                 default:
