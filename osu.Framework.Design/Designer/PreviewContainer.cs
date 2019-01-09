@@ -6,12 +6,15 @@ using osu.Framework.Design.Markup;
 using osu.Framework.Design.Solution;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Graphics.Sprites;
 using osu.Framework.Threading;
+using osuTK.Graphics;
 
 namespace osu.Framework.Design.Designer
 {
     public class PreviewContainer : Container
     {
+        readonly SpriteText _statusText;
         readonly ParserErrorDisplay _errorDisplay;
         readonly Container _content;
 
@@ -21,6 +24,11 @@ namespace osu.Framework.Design.Designer
         {
             InternalChildren = new Drawable[]
             {
+                _content = new Container
+                {
+                    RelativeSizeAxes = Axes.Both,
+                    Masking = true
+                },
                 _errorDisplay = new ParserErrorDisplay
                 {
                     RelativeSizeAxes = Axes.Both,
@@ -28,10 +36,13 @@ namespace osu.Framework.Design.Designer
                     Anchor = Anchor.BottomLeft,
                     Origin = Anchor.BottomLeft
                 },
-                _content = new Container
+                _statusText = new SpriteText
                 {
-                    RelativeSizeAxes = Axes.Both,
-                    Masking = true
+                    Anchor = Anchor.TopRight,
+                    Origin = Anchor.TopRight,
+                    TextSize = 24,
+                    Shadow = true,
+                    Text = "Waiting..."
                 }
             };
 
@@ -54,10 +65,16 @@ namespace osu.Framework.Design.Designer
 
         void handleChange(Document doc)
         {
-            _content.FadeTo(0.4f, 200);
-
             if (doc?.Type != DocumentType.Markup)
+            {
+                _statusText.Text = "Not markup";
+                _statusText.FadeColour(Color4.White, 200);
+                _content.FadeTo(0.2f, 200);
                 return;
+            }
+
+            _statusText.Text = "Parsing...";
+            _statusText.FadeColour(Color4.SkyBlue, 200);
 
             _updateTask?.Cancel();
             _updateTask = Scheduler.AddDelayed(
@@ -81,6 +98,9 @@ namespace osu.Framework.Design.Designer
                     }
                     catch (Exception e)
                     {
+                        _statusText.Text = "Error!";
+                        _statusText.FadeColour(Color4.Red, 30);
+
                         _error.Value = e;
                     }
                 },
