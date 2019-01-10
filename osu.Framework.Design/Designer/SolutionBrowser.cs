@@ -16,13 +16,13 @@ using osuTK.Graphics;
 
 namespace osu.Framework.Design.Designer
 {
-    public class SolutionBrowser : CompositeDrawable
+    public class SolutionBrowser : ComponentWindow
     {
         readonly FillFlowContainer<Item> _flow;
 
-        public SolutionBrowser()
+        public SolutionBrowser() : base("Explorer")
         {
-            InternalChildren = new Drawable[]
+            Children = new Drawable[]
             {
                 new Box
                 {
@@ -66,9 +66,10 @@ namespace osu.Framework.Design.Designer
                     var flow = folderFlow.FirstOrDefault(i => i.Name == folder.Name);
 
                     if (flow == null)
-                        folderFlow.Add(flow = new Item(folder.Name, null, level++));
+                        folderFlow.Add(flow = new Item(folder.Name, null, level));
 
                     folderFlow = flow;
+                    level++;
                 }
 
                 folderFlow.Add(new Item(doc.Name, doc, level));
@@ -177,6 +178,7 @@ namespace osu.Framework.Design.Designer
                                             {
                                                 Text = Name,
                                                 TextSize = 18,
+                                                Font = "Nunito",
                                                 Colour = DesignerColours.SideForeground
                                             }
                                         }
