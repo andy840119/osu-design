@@ -8,7 +8,7 @@ namespace osu.Framework.Design.CodeEditor
 {
     public class EditorModel
     {
-        public int Length => Lines.Sum(l => l.Length);
+        public int Length => Lines.Sum(l => l.Length) + Lines.Count - 1;
 
         public BindableList<EditorLine> Lines { get; } = new BindableList<EditorLine>();
 
@@ -19,7 +19,12 @@ namespace osu.Framework.Design.CodeEditor
                 var builder = new StringBuilder();
 
                 for (var i = 0; i < Lines.Count; i++)
-                    builder.AppendLine(Lines[i].Text);
+                {
+                    builder.Append(Lines[i].Text);
+
+                    if (i != Lines.Count - 1)
+                        builder.Append('\n');
+                }
 
                 return builder.ToString();
             }
@@ -60,6 +65,7 @@ namespace osu.Framework.Design.CodeEditor
             if (string.IsNullOrEmpty(value))
             {
                 Lines.Clear();
+                Lines.Add(new EditorLine());
                 return;
             }
 

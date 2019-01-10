@@ -115,13 +115,13 @@ namespace osu.Framework.Design.CodeEditor
 
                 if (pos.Y > line.DrawHeight)
                 {
-                    index += line.Model.Length;
+                    index += line.Model.Length + 1;
 
                     pos.Y -= line.DrawHeight;
                     continue;
                 }
 
-                index += (int)Math.Round(pos.X / fixedWidth / FontSize.Value);
+                index += Math.Clamp((int)Math.Round(pos.X / fixedWidth / FontSize.Value), 0, line.Model.Length);
 
                 CaretPosition.Value = index;
                 break;
@@ -173,9 +173,9 @@ namespace osu.Framework.Design.CodeEditor
                 var line = _flow[i];
 
                 // Find line that contains index
-                if (index >= line.Model.Length)
+                if (index >= line.Model.Length + 1)
                 {
-                    index -= line.Model.Length;
+                    index -= line.Model.Length + 1;
                     continue;
                 }
 
