@@ -12,9 +12,9 @@ namespace osu.Framework.Design.CodeEditor
         public DrawableCaret()
         {
             Masking = true;
-            CornerRadius = 2;
+            CornerRadius = 1.5f;
 
-            Size = new Vector2(4, 20);
+            Size = new Vector2(3, 20);
 
             InternalChild = new Box
             {
