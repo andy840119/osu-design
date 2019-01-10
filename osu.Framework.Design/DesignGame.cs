@@ -42,8 +42,17 @@ namespace osu.Framework.Design
             Resources.AddStore(new NamespacedResourceStore<byte[]>(new DllResourceStore("osu.Framework.Design.dll"), "Resources"));
 
             // Load fonts
-            var fonts = new FontStore(new GlyphStore(Resources, "Fonts/Consolas"));
+            var fonts = new FontStore(new GlyphStore(Resources, "Fonts/Nunito"));
             _dependencies.Cache(fonts);
+
+            fonts.AddStore(new GlyphStore(Resources, "Fonts/Nunito-Bold"));
+            fonts.AddStore(new GlyphStore(Resources, "Fonts/Nunito-Italic"));
+            fonts.AddStore(new GlyphStore(Resources, "Fonts/Nunito-BoldItalic"));
+            fonts.AddStore(new GlyphStore(Resources, "Fonts/Inconsolata"));
+            fonts.AddStore(new GlyphStore(Resources, "Fonts/Inconsolata-Bold"));
+            fonts.AddStore(new GlyphStore(Resources, "Fonts/Inconsolata-Italic"));
+            fonts.AddStore(new GlyphStore(Resources, "Fonts/Inconsolata-BoldItalic"));
+            fonts.AddStore(new GlyphStore(Resources, "Fonts/Consolas"));
 
             // Global workspace
             _dependencies.CacheAs<IFileSystem>(_fileSystem = new FileSystem());

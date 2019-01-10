@@ -23,7 +23,7 @@ namespace osu.Framework.Design.CodeEditor
         readonly DrawableCaret _caret;
         readonly MouseInputReceptor _mouse;
 
-        public Bindable<string> Font { get; } = new Bindable<string>("Consolas");
+        public Bindable<string> Font { get; } = new Bindable<string>("Inconsolata");
         public Bindable<float> FontSize { get; } = new Bindable<float>(20);
 
         public Bindable<int> CaretPosition { get; } = new Bindable<int>();
