@@ -18,9 +18,10 @@ namespace osu.Framework.Design.CodeEditor
     {
         public EditorModel Model { get; }
 
-        ScrollContainer _scroll;
-        FillFlowContainer<DrawableLine> _flow;
-        DrawableCaret _caret;
+        readonly ScrollContainer _scroll;
+        readonly FillFlowContainer<DrawableLine> _flow;
+        readonly DrawableCaret _caret;
+        readonly MouseInputReceptor _mouse;
 
         public Bindable<string> Font { get; } = new Bindable<string>("Consolas");
         public Bindable<float> FontSize { get; } = new Bindable<float>(20);
@@ -61,10 +62,23 @@ namespace osu.Framework.Design.CodeEditor
                             _caret = new DrawableCaret()
                         }
                     }
+                },
+                _mouse = new MouseInputReceptor
+                {
+                    RelativeSizeAxes = Axes.Both
                 }
             };
 
+            _mouse.MouseDown += handleMouseDown;
+
             handleLinesAdded(Model.Lines);
+        }
+
+        sealed class MouseInputReceptor : Drawable
+        {
+            public event Func<MouseDownEvent, bool> MouseDown;
+
+            protected override bool OnMouseDown(MouseDownEvent e) => MouseDown?.Invoke(e) ?? false;
         }
 
         DependencyContainer _dependencies;
@@ -87,6 +101,33 @@ namespace osu.Framework.Design.CodeEditor
 
             // Bind caret event and update it
             CaretPosition.BindValueChanged(handleCaretMove, true);
+        }
+
+        bool handleMouseDown(MouseDownEvent e)
+        {
+            var pos = _flow.ToLocalSpace(e.ScreenSpaceMouseDownPosition);
+
+            var index = 0;
+
+            for (var i = 0; i < _flow.Count; i++)
+            {
+                var line = _flow[i];
+
+                if (pos.Y > line.DrawHeight)
+                {
+                    index += line.Model.Length;
+
+                    pos.Y -= line.DrawHeight;
+                    continue;
+                }
+
+                index += (int)Math.Round(pos.X / fixedWidth / FontSize.Value);
+
+                CaretPosition.Value = index;
+                break;
+            }
+
+            return true;
         }
 
         void handleLinesAdded(IEnumerable<EditorLine> models)
