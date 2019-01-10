@@ -40,7 +40,8 @@ namespace osu.Framework.Design.Designer
                 {
                     Anchor = Anchor.TopRight,
                     Origin = Anchor.TopRight,
-                    TextSize = 24,
+                    TextSize = 20,
+                    Font = "Inconsolata",
                     Shadow = true,
                     Text = "Waiting..."
                 }

@@ -32,6 +32,7 @@ namespace osu.Framework.Design.Designer
                     Child = _flow = new TextFlowContainer(text =>
                     {
                         text.TextSize = 18;
+                        text.Font = "Nunito";
                     })
                     {
                         RelativeSizeAxes = Axes.X,
@@ -51,14 +52,16 @@ namespace osu.Framework.Design.Designer
             {
                 t.Colour = DesignerColours.Error;
                 t.TextSize = 24;
+                t.Font = "Nunito-Bold";
             });
-            _flow.AddText($"Source: {e.Source}\n", t =>
+            _flow.AddText($"{e.Source}\n", t =>
             {
                 t.Colour = DesignerColours.Highlight;
             });
             _flow.AddText($"Trace:\n{e.StackTrace}", t =>
             {
-                t.Alpha = 0.8f;
+                t.Alpha = 0.7f;
+                t.Font = "Inconsolata";
             });
         }
     }
