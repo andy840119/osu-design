@@ -4,21 +4,29 @@ using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
+using osu.Framework.Graphics.UserInterface;
 using osuTK.Graphics;
 
 namespace osu.Framework.Design.Designer
 {
-    public class ParserErrorDisplay : CompositeDrawable
+    public class ParserErrorDisplay : CompositeDrawable, IHasCurrentValue<Exception>
     {
         readonly TextFlowContainer _flow;
 
-        public Bindable<Exception> Current { get; }
+        readonly Bindable<Exception> _current = new Bindable<Exception>();
+
+        public Bindable<Exception> Current
+        {
+            get => _current;
+            set
+            {
+                _current.UnbindBindings();
+                _current.BindTo(value);
+            }
+        }
 
         public ParserErrorDisplay()
         {
-            Current = new Bindable<Exception>();
-            Current.ValueChanged += handleChange;
-
             InternalChildren = new Drawable[]
             {
                 new Box
@@ -42,11 +50,16 @@ namespace osu.Framework.Design.Designer
                     }
                 }
             };
+
+            Current.BindValueChanged(handleChange, true);
         }
 
         void handleChange(Exception e)
         {
             _flow.Clear(true);
+
+            if (e == null)
+                return;
 
             _flow.AddText($"{e.Message}\n", t =>
             {

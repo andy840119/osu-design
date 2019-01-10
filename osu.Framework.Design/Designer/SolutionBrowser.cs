@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Allocation;
@@ -10,7 +11,6 @@ using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Graphics.Textures;
 using osu.Framework.Input.Events;
-using osu.Framework.MathUtils;
 using osuTK;
 using osuTK.Graphics;
 
@@ -18,10 +18,23 @@ namespace osu.Framework.Design.Designer
 {
     public class SolutionBrowser : ComponentWindow
     {
-        readonly FillFlowContainer<Item> _flow;
+        public Action<Document> OpenDocument;
+
+        FillFlowContainer<Item> _flow;
 
         public SolutionBrowser() : base("Explorer")
         {
+        }
+
+        BindableList<Document> _documents;
+
+        [BackgroundDependencyLoader]
+        void load(Workspace workspace)
+        {
+            _documents = workspace.Documents.GetBoundCopy();
+            _documents.ItemsAdded += handleAdded;
+            _documents.ItemsRemoved += handleRemoved;
+
             Children = new Drawable[]
             {
                 new Box
@@ -36,20 +49,11 @@ namespace osu.Framework.Design.Designer
                     {
                         RelativeSizeAxes = Axes.X,
                         AutoSizeAxes = Axes.Y,
-                        Direction = FillDirection.Vertical
+                        Direction = FillDirection.Vertical,
+                        Padding = new MarginPadding(5)
                     }
                 }
             };
-        }
-
-        BindableList<Document> _documents;
-
-        [BackgroundDependencyLoader]
-        void load(Workspace workspace)
-        {
-            _documents = workspace.Documents.GetBoundCopy();
-            _documents.ItemsAdded += handleAdded;
-            _documents.ItemsRemoved += handleRemoved;
 
             handleAdded(_documents);
         }
@@ -66,35 +70,39 @@ namespace osu.Framework.Design.Designer
                     var flow = folderFlow.FirstOrDefault(i => i.Name == folder.Name);
 
                     if (flow == null)
-                        folderFlow.Add(flow = new Item(folder.Name, null, level));
+                        folderFlow.Add(flow = new Item(folder.Name, null, level, null));
 
                     folderFlow = flow;
                     level++;
                 }
 
-                folderFlow.Add(new Item(doc.Name, doc, level));
+                folderFlow.Add(new Item(doc.Name, doc, level, handleClick));
+            }
+        }
+
+        Item _clickedItem;
+
+        void handleClick(Item item)
+        {
+            // Unhighlight last item
+            _clickedItem?.Highlight(false);
+
+            _clickedItem = item;
+
+            if (item != null)
+            {
+                item.Highlight(true);
+                OpenDocument?.Invoke(item.Document);
             }
         }
 
         void handleRemoved(IEnumerable<Document> docs)
         {
+            // TODO: Remove handling
         }
 
         public sealed class Item : Container<Item>
         {
-            readonly Container<Item> _content;
-            readonly Drawable _head;
-            readonly Sprite _icon;
-
-            readonly Drawable _hover;
-            readonly Drawable _highlight;
-
-            readonly Drawable _hierarchyMarker;
-
-            protected override Container<Item> Content => _content;
-
-            readonly Document _doc;
-
             static readonly Color4[] folderColours = new[]
             {
                 Color4.Red,
@@ -106,117 +114,40 @@ namespace osu.Framework.Design.Designer
                 Color4.Purple
             };
 
-            public Item(string name, Document doc, int level)
+            Container<Item> _content;
+            Drawable _head;
+            Sprite _icon;
+
+            Drawable _hover;
+            Drawable _highlight;
+            Drawable _hierarchyMarker;
+
+            protected override Container<Item> Content => _content;
+
+            public readonly Document Document;
+            readonly Action<Item> _click;
+            readonly Color4 _markerColour;
+
+            public Item(string name, Document doc, int level, Action<Item> click)
             {
                 Name = name;
-                _doc = doc;
+                Document = doc;
+                _click = click;
+                _markerColour = folderColours[level % folderColours.Length].Opacity(0.5f);
 
                 RelativeSizeAxes = Axes.X;
                 AutoSizeAxes = Axes.Y;
-
-                InternalChildren = new Drawable[]
-                {
-                    _hierarchyMarker = new Box
-                    {
-                        RelativeSizeAxes = Axes.Y,
-                        Width = 2,
-                        Colour = folderColours[level % folderColours.Length].Opacity(0.5f),
-                        Alpha = 0
-                    },
-                    new FillFlowContainer
-                    {
-                        RelativeSizeAxes = Axes.X,
-                        AutoSizeAxes = Axes.Y,
-                        Direction = FillDirection.Vertical,
-                        Children = new Drawable[]
-                        {
-                            _head = new Container
-                            {
-                                RelativeSizeAxes = Axes.X,
-                                AutoSizeAxes = Axes.Y,
-                                Children = new Drawable[]
-                                {
-                                    _highlight = new Container
-                                    {
-                                        RelativeSizeAxes = Axes.Both,
-                                        Masking = true,
-                                        CornerRadius = 5,
-                                        Alpha = 0,
-                                        Child = new Box
-                                        {
-                                            RelativeSizeAxes = Axes.Both,
-                                            Colour = DesignerColours.Highlight.Opacity(0.6f)
-                                        }
-                                    },
-                                    _hover = new Container
-                                    {
-                                        RelativeSizeAxes = Axes.Both,
-                                        Masking = true,
-                                        CornerRadius = 5,
-                                        Alpha = 0,
-                                        Child = new Box
-                                        {
-                                            RelativeSizeAxes = Axes.Both,
-                                            Colour = Color4.White.Opacity(0.1f)
-                                        }
-                                    },
-                                    new FillFlowContainer
-                                    {
-                                        RelativeSizeAxes = Axes.X,
-                                        AutoSizeAxes = Axes.Y,
-                                        Direction = FillDirection.Horizontal,
-                                        Padding = new MarginPadding(4),
-                                        Spacing = new Vector2(5, 0),
-                                        Children = new Drawable[]
-                                        {
-                                            _icon = new Sprite
-                                            {
-                                                Size = new Vector2(18),
-                                                FillMode = FillMode.Fit
-                                            },
-                                            new SpriteText
-                                            {
-                                                Text = Name,
-                                                TextSize = 18,
-                                                Font = "Nunito",
-                                                Colour = DesignerColours.SideForeground
-                                            }
-                                        }
-                                    }
-                                }
-                            },
-                            _content = new FillFlowContainer<Item>
-                            {
-                                RelativeSizeAxes = Axes.X,
-                                AutoSizeAxes = Axes.Y,
-                                Direction = FillDirection.Vertical,
-                                Padding = new MarginPadding
-                                {
-                                    Left = 18
-                                },
-                                Alpha = 0
-                            }
-                        }
-                    }
-                };
             }
-
-            Workspace _workspace;
-            Bindable<WorkingDocument> _document { get; set; }
 
             Texture _tex;
             Texture _texOpen;
 
             [BackgroundDependencyLoader]
-            void load(Workspace workspace, TextureStore textures)
+            void load(TextureStore textures)
             {
-                _workspace = workspace;
-                _document = workspace.CurrentDocument.GetBoundCopy();
-                _document.BindValueChanged(d => Highlight(_doc != null && d?.Document == _doc), true);
-
                 string tex;
 
-                if (_doc == null)
+                if (Document == null)
                 {
                     switch (Name.ToLowerInvariant())
                     {
@@ -236,14 +167,14 @@ namespace osu.Framework.Design.Designer
                 }
                 else
                 {
-                    switch (_doc.File.Name.ToLowerInvariant())
+                    switch (Document.File.Name.ToLowerInvariant())
                     {
                         case "license": tex = "file_type_license"; break;
                         case "launch.json": tex = "file_type_vscode"; break;
                         case "tasks.json": tex = "file_type_vscode"; break;
                         case "settings.json": tex = "file_type_vscode"; break;
                     }
-                    switch (_doc.File.Extension.ToLowerInvariant())
+                    switch (Document.File.Extension.ToLowerInvariant())
                     {
                         case ".mp3":
                         case ".ogg": tex = "file_type_audio"; break;
@@ -278,7 +209,89 @@ namespace osu.Framework.Design.Designer
                 _tex = textures.Get(tex);
                 _texOpen = textures.Get($"{tex}_opened");
 
-                _icon.Texture = _tex;
+                InternalChildren = new Drawable[]
+                {
+                    _hierarchyMarker = new Box
+                    {
+                        RelativeSizeAxes = Axes.Y,
+                        Width = 2,
+                        Colour = _markerColour,
+                        Alpha = 0
+                    },
+                    new FillFlowContainer
+                    {
+                        RelativeSizeAxes = Axes.X,
+                        AutoSizeAxes = Axes.Y,
+                        Direction = FillDirection.Vertical,
+                        Children = new Drawable[]
+                        {
+                            _head = new Container
+                            {
+                                RelativeSizeAxes = Axes.X,
+                                AutoSizeAxes = Axes.Y,
+                                Children = new Drawable[]
+                                {
+                                    new Container
+                                    {
+                                        RelativeSizeAxes = Axes.Both,
+                                        Masking = true,
+                                        CornerRadius = 5,
+                                        Children = new[]
+                                        {
+                                            _highlight = new Box
+                                            {
+                                                RelativeSizeAxes = Axes.Both,
+                                                Colour = DesignerColours.Highlight.Opacity(0.4f),
+                                                Alpha = 0
+                                            },
+                                            _hover = new Box
+                                            {
+                                                RelativeSizeAxes = Axes.Both,
+                                                Colour = Color4.White.Opacity(0.04f),
+                                                Alpha = 0
+                                            }
+                                        }
+                                    },
+                                    new FillFlowContainer
+                                    {
+                                        RelativeSizeAxes = Axes.X,
+                                        AutoSizeAxes = Axes.Y,
+                                        Direction = FillDirection.Horizontal,
+                                        Padding = new MarginPadding(4),
+                                        Spacing = new Vector2(5, 0),
+                                        Children = new Drawable[]
+                                        {
+                                            _icon = new Sprite
+                                            {
+                                                Size = new Vector2(18),
+                                                FillMode = FillMode.Fit,
+                                                Texture = _tex
+                                            },
+                                            new SpriteText
+                                            {
+                                                Text = Name,
+                                                TextSize = 18,
+                                                Font = "Nunito",
+                                                Colour = DesignerColours.SideForeground
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            _content = new FillFlowContainer<Item>
+                            {
+                                RelativeSizeAxes = Axes.X,
+                                AutoSizeAxes = Axes.Y,
+                                Direction = FillDirection.Vertical,
+                                Padding = new MarginPadding
+                                {
+                                    Left = 18
+                                },
+                                Alpha = 0
+                            }
+                        }
+                    }
+                };
             }
 
             protected override bool OnHover(HoverEvent e)
@@ -287,10 +300,10 @@ namespace osu.Framework.Design.Designer
 
                 _hover.FadeIn(30);
 
-                if (_doc == null)
+                if (Document == null)
                     _hierarchyMarker.FadeIn(30);
 
-                return _doc == null;
+                return Document == null;
             }
             protected override void OnHoverLost(HoverLostEvent e)
             {
@@ -298,7 +311,7 @@ namespace osu.Framework.Design.Designer
 
                 _hover.FadeOut(200);
 
-                if (_doc == null)
+                if (Document == null)
                     _hierarchyMarker.FadeOut(200);
             }
 
@@ -308,7 +321,7 @@ namespace osu.Framework.Design.Designer
             {
                 base.OnClick(e);
 
-                if (_doc == null)
+                if (Document == null)
                 {
                     if (_collapsed)
                     {
@@ -324,7 +337,7 @@ namespace osu.Framework.Design.Designer
                     _collapsed = !_collapsed;
                 }
                 else
-                    _workspace.SetCurrentDocument(_doc);
+                    _click?.Invoke(this);
 
                 return true;
             }

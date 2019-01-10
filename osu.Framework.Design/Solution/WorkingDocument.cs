@@ -10,7 +10,7 @@ namespace osu.Framework.Design.Solution
 
         public Bindable<string> Content { get; } = new Bindable<string>();
 
-        public WorkingDocument(Document doc)
+        internal WorkingDocument(Document doc)
         {
             Document = doc;
         }

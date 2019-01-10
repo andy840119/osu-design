@@ -14,7 +14,6 @@ namespace osu.Framework.Design.Solution
 
         public Bindable<DirectoryInfoBase> Directory { get; } = new Bindable<DirectoryInfoBase>();
         public BindableList<Document> Documents { get; } = new BindableList<Document>();
-        public Bindable<WorkingDocument> CurrentDocument { get; } = new Bindable<WorkingDocument>();
 
         public Workspace()
         {
@@ -25,15 +24,15 @@ namespace osu.Framework.Design.Solution
 
         void handleDirectoryChange(DirectoryInfoBase dir)
         {
-            CurrentDocument.Value = null;
+            Documents.Clear();
 
             // Dispose last watcher
             if (_watcher != null)
             {
                 _watcher.Created -= handleCreated;
-                _watcher.Changed -= handleChanged;
                 _watcher.Deleted -= handleDeleted;
                 _watcher.Dispose();
+                _watcher = null;
             }
 
             if (dir == null)
@@ -44,10 +43,8 @@ namespace osu.Framework.Design.Solution
             _watcher.IncludeSubdirectories = true;
             _watcher.EnableRaisingEvents = true;
             _watcher.Created += handleCreated;
-            _watcher.Changed += handleChanged;
             _watcher.Deleted += handleDeleted;
 
-            Documents.Clear();
             Documents.AddRange(dir
                 .EnumerateFiles("*", SearchOption.AllDirectories)
                 .Select(f => new Document(this, f))
@@ -56,6 +53,7 @@ namespace osu.Framework.Design.Solution
 
         void handleCreated(object sender, FileSystemEventArgs e)
         {
+            // We use a scheduler because filesystem watcher runs on a different thread
             Scheduler.Add(() =>
             {
                 var document = new Document(this, Directory.Value.FileSystem.FileInfo.FromFileName(e.FullPath));
@@ -69,31 +67,18 @@ namespace osu.Framework.Design.Solution
             });
         }
 
-        void handleChanged(object sender, FileSystemEventArgs e)
-        {
-            if (e.FullPath != CurrentDocument.Value?.Document.File.FullName)
-                return;
-
-            Scheduler.Add(CurrentDocument.Value.UpdateContent);
-        }
-
         void handleDeleted(object sender, FileSystemEventArgs e)
         {
+            // We use a scheduler because filesystem watcher runs on a different thread
             Scheduler.Add(() =>
             {
                 Documents.RemoveAll(d => d.File.FullName == e.FullPath);
             });
         }
 
-        public void SetCurrentDocument(Document doc)
-        {
-            CurrentDocument.Value = new WorkingDocument(doc);
-            CurrentDocument.Value.UpdateContent();
-        }
-
         public void Dispose()
         {
-            _watcher.Dispose();
+            _watcher?.Dispose();
         }
     }
 }

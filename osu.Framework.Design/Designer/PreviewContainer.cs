@@ -14,13 +14,16 @@ namespace osu.Framework.Design.Designer
 {
     public class PreviewContainer : Container
     {
-        readonly SpriteText _statusText;
-        readonly ParserErrorDisplay _errorDisplay;
-        readonly Container _content;
+        SpriteText _statusText;
+        ParserErrorDisplay _errorDisplay;
+        Container _content;
 
         protected override Container<Drawable> Content => _content;
 
-        public PreviewContainer()
+        Bindable<string> _documentContent;
+
+        [BackgroundDependencyLoader]
+        void load(WorkingDocument doc)
         {
             InternalChildren = new Drawable[]
             {
@@ -38,9 +41,9 @@ namespace osu.Framework.Design.Designer
                 },
                 _statusText = new SpriteText
                 {
-                    Anchor = Anchor.TopRight,
-                    Origin = Anchor.TopRight,
-                    TextSize = 20,
+                    Anchor = Anchor.BottomRight,
+                    Origin = Anchor.BottomRight,
+                    TextSize = 18,
                     Font = "Inconsolata",
                     Shadow = true,
                     Text = "Waiting..."
@@ -48,25 +51,9 @@ namespace osu.Framework.Design.Designer
             };
 
             _error = _errorDisplay.Current.GetBoundCopy();
-        }
 
-        Bindable<WorkingDocument> _document;
-        Bindable<string> _documentContent;
-
-        [BackgroundDependencyLoader]
-        void load(Workspace workspace)
-        {
-            _document = workspace.CurrentDocument.GetBoundCopy();
-            _document.BindValueChanged(d =>
-            {
-                _documentContent?.UnbindAll();
-
-                if (d == null)
-                    return;
-
-                _documentContent = d.Content.GetBoundCopy();
-                _documentContent.BindValueChanged(handleChange, true);
-            }, true);
+            _documentContent = doc.Content.GetBoundCopy();
+            _documentContent.BindValueChanged(handleChange, true);
         }
 
         ScheduledDelegate _updateTask;

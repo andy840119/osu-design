@@ -66,5 +66,13 @@ namespace osu.Framework.Design.Solution
                 }
             }
         }
+
+        public WorkingDocument CreateWorkingDocument()
+        {
+            var working = new WorkingDocument(this);
+            working.UpdateContent();
+
+            return working;
+        }
     }
 }
