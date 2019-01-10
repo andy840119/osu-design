@@ -225,7 +225,7 @@ namespace osu.Framework.Design.CodeEditor
                     }
                     break;
                 case Key.Delete:
-                    if (CaretPosition.Value < Model.Length - 1)
+                    if (CaretPosition.Value < Model.Length)
                     {
                         Model.Remove(CaretPosition.Value, 1);
                     }
