@@ -7,11 +7,11 @@ namespace osu.Framework.Design.CodeEditor
 {
     public class EditorLine
     {
-        public int Length => Words.Sum(w => w.Length) + 1;
+        public int Length => Words.Sum(w => w.Length);
 
         public BindableList<EditorWord> Words { get; } = new BindableList<EditorWord>();
 
-        public string Text => string.Concat(Words.Select(w => w.Text.Value)) + '\n';
+        public string Text => string.Concat(Words.Select(w => w.Text.Value));
 
         public EditorLine(string value = "")
         {

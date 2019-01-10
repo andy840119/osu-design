@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using osu.Framework.Configuration;
 
@@ -11,7 +12,18 @@ namespace osu.Framework.Design.CodeEditor
 
         public BindableList<EditorLine> Lines { get; } = new BindableList<EditorLine>();
 
-        public string Text => string.Concat(Lines.Select(l => l.Text));
+        public string Text
+        {
+            get
+            {
+                var builder = new StringBuilder();
+
+                for (var i = 0; i < Lines.Count; i++)
+                    builder.AppendLine(Lines[i].Text);
+
+                return builder.ToString();
+            }
+        }
 
         public EditorModel(string value = "")
         {
