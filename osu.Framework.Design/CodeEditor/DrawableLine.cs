@@ -7,8 +7,12 @@ using osuTK;
 
 namespace osu.Framework.Design.CodeEditor
 {
-    public class DrawableLine : FillFlowContainer<DrawableWord>
+    public class DrawableLine : Container<DrawableWord>
     {
+        readonly FillFlowContainer<DrawableWord> _flow;
+
+        protected override Container<DrawableWord> Content => _flow;
+
         public EditorLine Model { get; }
 
         public DrawableLine(EditorLine model)
@@ -18,9 +22,19 @@ namespace osu.Framework.Design.CodeEditor
             Model.Words.ItemsRemoved += handleWordsRemoved;
 
             AutoSizeAxes = Axes.Both;
-            Direction = FillDirection.Horizontal;
-            LayoutEasing = Easing.OutQuint;
-            LayoutDuration = 50;
+            InternalChildren = new Drawable[]
+            {
+                // Placeholder to hold the line size when it is empty
+                new DrawableWord(new EditorWord(" ")),
+
+                _flow = new FillFlowContainer<DrawableWord>
+                {
+                    AutoSizeAxes = Axes.Both,
+                    Direction = FillDirection.Horizontal,
+                    LayoutEasing = Easing.OutQuint,
+                    LayoutDuration = 50
+                }
+            };
 
             handleWordsAdded(model.Words);
         }
@@ -28,7 +42,7 @@ namespace osu.Framework.Design.CodeEditor
         void handleWordsAdded(IEnumerable<EditorWord> models)
         {
             foreach (var model in models)
-                Add(new DrawableWord(model));
+                _flow.Add(new DrawableWord(model));
 
             updateWordPositions();
         }
@@ -36,7 +50,7 @@ namespace osu.Framework.Design.CodeEditor
         void handleWordsRemoved(IEnumerable<EditorWord> models)
         {
             foreach (var model in models)
-                Remove(this.First(l => l.Model == model));
+                _flow.Remove(_flow.First(l => l.Model == model));
 
             updateWordPositions();
         }
@@ -44,7 +58,7 @@ namespace osu.Framework.Design.CodeEditor
         void updateWordPositions()
         {
             foreach (var word in this)
-                SetLayoutPosition(word, Model.Words.IndexOf(word.Model));
+                _flow.SetLayoutPosition(word, Model.Words.IndexOf(word.Model));
         }
     }
 }
