@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="GuiLabs.Language.Xml" Version="1.2.35" />
     <PackageReference Include="Microsoft.CodeAnalysis" Version="2.10.0" />
     <PackageReference Include="ppy.osu.Framework" Version="2019.107.0" />
     <PackageReference Include="System.IO.Abstractions" Version="3.0.10" />
