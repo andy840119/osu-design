@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "osu.Framework.Design", "osu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "osu.Framework.Design.Tests", "osu.Framework.Design.Tests\osu.Framework.Design.Tests.csproj", "{E384FF39-686E-4CD5-922D-C7DC26E2A16E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "osu.Framework.Design.Desktop", "osu.Framework.Design.Desktop\osu.Framework.Design.Desktop.csproj", "{8E8323B7-7E5D-42A4-B36E-D0F70AA26539}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,5 +46,17 @@ Global
 		{E384FF39-686E-4CD5-922D-C7DC26E2A16E}.Release|x64.Build.0 = Release|Any CPU
 		{E384FF39-686E-4CD5-922D-C7DC26E2A16E}.Release|x86.ActiveCfg = Release|Any CPU
 		{E384FF39-686E-4CD5-922D-C7DC26E2A16E}.Release|x86.Build.0 = Release|Any CPU
+		{8E8323B7-7E5D-42A4-B36E-D0F70AA26539}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E8323B7-7E5D-42A4-B36E-D0F70AA26539}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E8323B7-7E5D-42A4-B36E-D0F70AA26539}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{8E8323B7-7E5D-42A4-B36E-D0F70AA26539}.Debug|x64.Build.0 = Debug|Any CPU
+		{8E8323B7-7E5D-42A4-B36E-D0F70AA26539}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{8E8323B7-7E5D-42A4-B36E-D0F70AA26539}.Debug|x86.Build.0 = Debug|Any CPU
+		{8E8323B7-7E5D-42A4-B36E-D0F70AA26539}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E8323B7-7E5D-42A4-B36E-D0F70AA26539}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E8323B7-7E5D-42A4-B36E-D0F70AA26539}.Release|x64.ActiveCfg = Release|Any CPU
+		{8E8323B7-7E5D-42A4-B36E-D0F70AA26539}.Release|x64.Build.0 = Release|Any CPU
+		{8E8323B7-7E5D-42A4-B36E-D0F70AA26539}.Release|x86.ActiveCfg = Release|Any CPU
+		{8E8323B7-7E5D-42A4-B36E-D0F70AA26539}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

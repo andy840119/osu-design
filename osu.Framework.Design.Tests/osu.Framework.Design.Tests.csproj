@@ -13,6 +13,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\osu.Framework.Design\osu.Framework.Design.csproj" />
+    <ProjectReference Include="..\osu.Framework.Design.Desktop\osu.Framework.Design.Desktop.csproj" />
   </ItemGroup>
 
 </Project>
