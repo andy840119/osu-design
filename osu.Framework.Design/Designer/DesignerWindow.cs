@@ -21,11 +21,13 @@ namespace osu.Framework.Design.Designer
         protected override IReadOnlyDependencyContainer CreateChildDependencies(IReadOnlyDependencyContainer parent) =>
             _dependencies = new DependencyContainer(base.CreateChildDependencies(parent));
 
+        WorkingDocument _document;
+
         [BackgroundDependencyLoader]
         void load()
         {
             // Working document for all components of this designer
-            _dependencies.Cache(Document.CreateWorkingDocument());
+            _dependencies.Cache(_document = Document.CreateWorkingDocument());
 
             Child = new HalvedContainer(
                 Direction.Vertical,
@@ -35,6 +37,8 @@ namespace osu.Framework.Design.Designer
                 },
                 _editor = new DrawableEditor()
             );
+
+            _document.Content.BindValueChanged(_editor.Set, true);
         }
     }
 }

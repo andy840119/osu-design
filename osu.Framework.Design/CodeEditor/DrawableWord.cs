@@ -3,38 +3,44 @@ using osu.Framework.Configuration;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Colour;
 using osu.Framework.Graphics.Sprites;
+using osuTK.Graphics;
 
 namespace osu.Framework.Design.CodeEditor
 {
     // We simply derive from spritetext because it is already heavily optimised using drawnodes
     public class DrawableWord : SpriteText
     {
-        public EditorWord Model { get; }
+        public int Length => Current.Value.Length;
 
-        public DrawableWord(EditorWord model)
+        public Bindable<SRGBColour> ColourBindable { get; } = new Bindable<SRGBColour>();
+        public Bindable<string> FontFamily { get; } = new Bindable<string>();
+        public BindableFloat FontSize { get; } = new BindableFloat();
+
+        public DrawableWord()
         {
-            Model = model;
-            Current.BindTo(Model.Text);
-
             FixedWidth = true;
             Shadow = true;
-        }
 
-        Bindable<SRGBColour> _colour;
-        Bindable<string> _font;
-        Bindable<float> _fontSize;
+            Set("");
+        }
 
         [BackgroundDependencyLoader]
         void load(DrawableEditor editor)
         {
-            _colour = Model.Colour.GetBoundCopy();
-            _font = editor.Font.GetBoundCopy();
-            _fontSize = editor.FontSize.GetBoundCopy();
+            ColourBindable.Value = Color4.White;
+            ColourBindable.BindValueChanged(c => this.FadeColour(c, 200), true);
 
-            _colour.BindValueChanged(c => this.FadeColour(c, 200), true);
-            _font.BindValueChanged(f => Font = f, true);
-            _fontSize.BindValueChanged(s => TextSize = s, true);
+            FontFamily.BindTo(editor.FontFamily);
+            FontFamily.BindValueChanged(f => Font = f, true);
+
+            FontSize.BindTo(editor.FontSize);
+            FontSize.BindValueChanged(s => TextSize = s, true);
         }
+
+        public void Insert(string value, int index) => Set(Current.Value.Insert(index, value));
+        public void Remove(int count, int index) => Set(Current.Value.Remove(index, count));
+
+        public void Set(string text) => Current.Value = text;
 
         protected override bool UseFixedWidthForCharacter(char c) => true;
     }

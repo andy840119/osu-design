@@ -1,10 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 using osu.Framework.Allocation;
 using osu.Framework.Configuration;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Graphics.UserInterface;
 using osu.Framework.Input;
 using osu.Framework.Input.Events;
 using osu.Framework.IO.Stores;
@@ -16,25 +19,38 @@ namespace osu.Framework.Design.CodeEditor
 {
     public class DrawableEditor : CompositeDrawable
     {
-        public EditorModel Model { get; }
+        ScrollContainer _scroll;
+        FillFlowContainer<DrawableLine> _flow;
+        MouseInputReceptor _mouse;
+        DrawableCaret _caret;
 
-        readonly ScrollContainer _scroll;
-        readonly FillFlowContainer<DrawableLine> _flow;
-        readonly DrawableCaret _caret;
-        readonly MouseInputReceptor _mouse;
+        public int Length => _flow.Sum(l => l.Length) + _flow.Count;
+        public string Text => string.Concat(_flow.Select(l => l.Text + '\n'));
 
-        public Bindable<string> Font { get; } = new Bindable<string>("Inconsolata");
-        public Bindable<float> FontSize { get; } = new Bindable<float>(20);
+        ITextInputSource _textInput;
 
-        public Bindable<int> CaretPosition { get; } = new Bindable<int>();
-        public Bindable<string> CurrentLine { get; } = new Bindable<string>();
-        public Bindable<string> SelectedText { get; } = new Bindable<string>();
+        public Bindable<string> FontFamily { get; } = new Bindable<string>("Inconsolata");
+        public BindableFloat FontSize { get; } = new BindableFloat(20);
 
-        public DrawableEditor()
+        public BindableInt SelectionStart { get; } = new BindableInt();
+
+        sealed class MouseInputReceptor : Drawable
         {
-            Model = new EditorModel();
-            Model.Lines.ItemsAdded += handleLinesAdded;
-            Model.Lines.ItemsRemoved += handleLinesRemoved;
+            public Func<MouseDownEvent, bool> MouseDown;
+
+            protected override bool OnMouseDown(MouseDownEvent e) => MouseDown?.Invoke(e) ?? false;
+        }
+
+        DependencyContainer _dependencies;
+        protected override IReadOnlyDependencyContainer CreateChildDependencies(IReadOnlyDependencyContainer parent) =>
+            _dependencies = new DependencyContainer(base.CreateChildDependencies(parent));
+
+        [BackgroundDependencyLoader]
+        void load(GameHost host, FontStore fonts)
+        {
+            _textInput = host.GetTextInput();
+
+            _dependencies.CacheAs(this);
 
             InternalChildren = new Drawable[]
             {
@@ -57,134 +73,33 @@ namespace osu.Framework.Design.CodeEditor
                                 AutoSizeAxes = Axes.Y,
                                 Direction = FillDirection.Vertical,
                                 LayoutEasing = Easing.OutQuint,
-                                LayoutDuration = 200
-                            },
-                            _caret = new DrawableCaret()
+                                LayoutDuration = 200,
+                                Child = new DrawableLine()
+                            }
                         }
                     }
                 },
+                _caret = new DrawableCaret(),
                 _mouse = new MouseInputReceptor
                 {
-                    RelativeSizeAxes = Axes.Both
+                    RelativeSizeAxes = Axes.Both,
+                    MouseDown = handleMouseDown
                 }
             };
 
-            _mouse.MouseDown += handleMouseDown;
-
-            handleLinesAdded(Model.Lines);
+            FontFamily.BindValueChanged(f =>
+            {
+                // Need font store to get fixed width size
+                _fixedWidth = fonts.GetCharacter(f, 'D').DisplayWidth;
+            }, true);
+            SelectionStart.BindValueChanged(updateCaretPosition, true);
         }
 
-        sealed class MouseInputReceptor : Drawable
+        protected override void LoadComplete()
         {
-            public event Func<MouseDownEvent, bool> MouseDown;
+            base.LoadComplete();
 
-            protected override bool OnMouseDown(MouseDownEvent e) => MouseDown?.Invoke(e) ?? false;
-        }
-
-        DependencyContainer _dependencies;
-        protected override IReadOnlyDependencyContainer CreateChildDependencies(IReadOnlyDependencyContainer parent) =>
-            _dependencies = new DependencyContainer(base.CreateChildDependencies(parent));
-
-        ITextInputSource _textInput;
-
-        [BackgroundDependencyLoader]
-        void load(GameHost host, FontStore fonts)
-        {
-            _textInput = host.GetTextInput();
             _textInput.Activate(this);
-
-            // Cache this as dependency for our children only
-            _dependencies.CacheAs(this);
-
-            // Need font store to get fixed width size
-            Font.BindValueChanged(f => fixedWidth = fonts.GetCharacter(f, 'D').DisplayWidth, true);
-
-            // Bind caret event and update it
-            CaretPosition.BindValueChanged(handleCaretMove, true);
-        }
-
-        bool handleMouseDown(MouseDownEvent e)
-        {
-            var pos = _flow.ToLocalSpace(e.ScreenSpaceMouseDownPosition);
-
-            var index = 0;
-
-            for (var i = 0; i < _flow.Count; i++)
-            {
-                var line = _flow[i];
-
-                if (pos.Y > line.DrawHeight)
-                {
-                    index += line.Model.Length + 1;
-
-                    pos.Y -= line.DrawHeight;
-                    continue;
-                }
-
-                index += Math.Clamp((int)Math.Round(pos.X / fixedWidth / FontSize.Value), 0, line.Model.Length);
-
-                CaretPosition.Value = index;
-                break;
-            }
-
-            return true;
-        }
-
-        void handleLinesAdded(IEnumerable<EditorLine> models)
-        {
-            if (LoadState != LoadState.Loaded)
-            {
-                Schedule(() => handleLinesAdded(models));
-                return;
-            }
-
-            foreach (var model in models)
-                _flow.Add(new DrawableLine(model));
-
-            updateLinePositions();
-        }
-
-        void handleLinesRemoved(IEnumerable<EditorLine> models)
-        {
-            if (LoadState != LoadState.Loaded)
-            {
-                Schedule(() => handleLinesRemoved(models));
-                return;
-            }
-
-            foreach (var model in models)
-                _flow.Remove(_flow.First(l => l.Model == model));
-
-            updateLinePositions();
-        }
-
-        void updateLinePositions()
-        {
-            foreach (var line in _flow)
-                _flow.SetLayoutPosition(line, Model.Lines.IndexOf(line.Model));
-        }
-
-        float fixedWidth;
-
-        void handleCaretMove(int index)
-        {
-            for (var i = 0; i < _flow.Count; i++)
-            {
-                var line = _flow[i];
-
-                // Find line that contains index
-                if (index >= line.Model.Length + 1)
-                {
-                    index -= line.Model.Length + 1;
-                    continue;
-                }
-
-                var y = i * FontSize.Value;
-                var x = index * fixedWidth * FontSize.Value;
-
-                _caret.MoveTo(new Vector2(x, y), 50, Easing.Out);
-                break;
-            }
         }
 
         protected override void Update()
@@ -196,14 +111,128 @@ namespace osu.Framework.Design.CodeEditor
 
             if (!string.IsNullOrEmpty(pending))
             {
-                Model.Insert(CaretPosition.Value, pending);
-                CaretPosition.Value += pending.Length;
+                Insert(pending);
+                AdvanceCaret();
             }
         }
 
-        public void MoveCaret(int position) => CaretPosition.Value = Math.Clamp(position, 0, Model.Length);
-        public void AdvanceCaret(int count = 1) => MoveCaret(CaretPosition.Value + count);
-        public void RetreatCaret(int count = 1) => MoveCaret(CaretPosition.Value - count);
+        public DrawableLine GetLineAtIndex(int index, out int lineIndex, out int charIndex)
+        {
+            for (var i = 0; i < _flow.Count; i++)
+            {
+                var line = _flow[i];
+
+                if (index >= line.Length + 1 && i != _flow.Count - 1)
+                {
+                    index -= line.Length - 1;
+                    continue;
+                }
+
+                lineIndex = i;
+                charIndex = index;
+                return line;
+            }
+
+            throw new ArgumentOutOfRangeException(nameof(index));
+        }
+
+        static readonly Regex _splitRegex = new Regex(@"[\r\n]", RegexOptions.Compiled);
+
+        public void Insert(string value) => Insert(value, SelectionStart.Value);
+        public void Insert(string value, int index)
+        {
+            var line = GetLineAtIndex(index, out var lineIndex, out var charIndex);
+
+            // We can skip newline handling if we don't have one
+            if (!_splitRegex.IsMatch(value))
+            {
+                line.Insert(value, charIndex);
+                return;
+            }
+
+            var parts = _splitRegex.Split(value).ToList();
+            var wordParts = _splitRegex.Split(line.Text.Insert(charIndex, parts[0] + '\n'));
+
+            line.Set(wordParts[0]);
+
+            parts.RemoveAt(0);
+            parts.InsertRange(0, wordParts.Skip(1));
+
+            var drawables = _flow.ToList();
+
+            for (var i = 0; i < parts.Count - 1; i++)
+            {
+                var drawable = new DrawableLine();
+                _flow.Add(drawable);
+
+                drawable.Set(parts[i]);
+                drawables.Insert(lineIndex + i + 1, drawable);
+            }
+
+            drawables[lineIndex + parts.Count - 1].Insert(parts[parts.Count - 1], 0);
+
+            foreach (var drawable in _flow)
+                _flow.SetLayoutPosition(drawable, drawables.IndexOf(drawable));
+        }
+
+        public void Remove(int count) => Remove(count, SelectionStart.Value);
+        public void Remove(int count, int index)
+        {
+            var drawables = _flow.ToList();
+
+            while (count > 0)
+            {
+                var line = GetLineAtIndex(index, out var lineIndex, out var charIndex);
+                var removeable = Math.Min(count, line.Length + 1 - charIndex);
+
+                if (removeable == 0)
+                    break;
+
+                if (line.Length == removeable)
+                {
+                    _flow.Remove(line);
+                    drawables.RemoveAt(lineIndex);
+                }
+                else
+                    line.Remove(removeable, charIndex);
+
+                count -= removeable;
+                charIndex = 0;
+            }
+
+            foreach (var drawable in _flow)
+                _flow.SetLayoutPosition(drawable, drawables.IndexOf(drawable));
+
+            // We want to keep at least one line
+            if (_flow.Count == 0)
+                _flow.Add(new DrawableLine());
+        }
+
+        public void Set(string text)
+        {
+            _flow.Child = new DrawableLine();
+            Insert(text, 0);
+        }
+
+        float _fixedWidth;
+
+        void updateCaretPosition(int index)
+        {
+            var line = GetLineAtIndex(index, out var lineIndex, out var wordIndex);
+
+            _caret.MoveTo(new Vector2(_fixedWidth * FontSize.Value * wordIndex, lineIndex * FontSize.Value), 50, Easing.OutQuint);
+        }
+
+        bool handleMouseDown(MouseDownEvent e)
+        {
+            var pos = _flow.ToLocalSpace(e.ScreenSpaceMouseDownPosition);
+
+            return true;
+        }
+
+        public void MoveCaret(int position) => SelectionStart.Value = Math.Clamp(position, 0, Length);
+        public void AdvanceCaret(int count = 1) => MoveCaret(SelectionStart.Value + count);
+        public void RetreatCaret(int count = 1) => MoveCaret(SelectionStart.Value - count);
 
         protected override bool OnKeyDown(KeyDownEvent e)
         {
@@ -218,21 +247,15 @@ namespace osu.Framework.Design.CodeEditor
                     AdvanceCaret();
                     break;
                 case Key.BackSpace:
-                    if (CaretPosition.Value > 0)
-                    {
-                        Model.Remove(CaretPosition.Value - 1, 1);
-                        RetreatCaret();
-                    }
+                    RetreatCaret();
+                    Remove(1);
                     break;
                 case Key.Delete:
-                    if (CaretPosition.Value < Model.Length)
-                    {
-                        Model.Remove(CaretPosition.Value, 1);
-                    }
+                    Remove(1);
                     break;
                 case Key.Enter:
                 case Key.KeypadEnter:
-                    Model.Insert(Math.Clamp(CaretPosition.Value, 0, Model.Length), "\n");
+                    Insert("\n");
                     AdvanceCaret();
                     break;
                 default:
