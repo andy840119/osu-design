@@ -13,8 +13,4 @@
     <EmbeddedResource Include="Resources\**\*" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="ppy.osu.Framework" Version="2019.116.0" />
-  </ItemGroup>
-
 </Project>
