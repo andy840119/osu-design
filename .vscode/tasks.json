@@ -7,7 +7,7 @@
       "type": "process",
       "args": [
         "build",
-        "${workspaceFolder}/osu.Framework.Design/osu.Framework.Design.csproj",
+        "${workspaceFolder}/osu.Framework.Design.Desktop/osu.Framework.Design.Desktop.csproj",
         "--no-restore"
       ],
       "problemMatcher": "$msCompile"

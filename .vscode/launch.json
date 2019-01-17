@@ -6,10 +6,10 @@
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build",
-      "program": "${workspaceFolder}/osu.Framework.Design/bin/Debug/netcoreapp2.2/osu.Framework.Design.dll",
-      "cwd": "${workspaceFolder}/osu.Framework.Design",
+      "program": "${workspaceFolder}/osu.Framework.Design.Desktop/bin/Debug/netcoreapp2.2/osu.Framework.Design.Desktop.dll",
+      "cwd": "${workspaceFolder}/osu.Framework.Design.Desktop",
       "args": [
-        "${workspaceFolder}/osu.Framework.Design/osu.Framework.Design.csproj"
+        "${workspaceFolder}/osu.Framework.Design/osu.Framework.Design.Desktop.csproj"
       ],
       "console": "internalConsole",
       "internalConsoleOptions": "openOnSessionStart"
