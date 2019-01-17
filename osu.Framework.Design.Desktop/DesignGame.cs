@@ -39,7 +39,7 @@ namespace osu.Framework.Design
         [BackgroundDependencyLoader]
         void load()
         {
-            Resources.AddStore(new NamespacedResourceStore<byte[]>(new DllResourceStore("osu.Framework.Design.dll"), "Resources"));
+            Resources.AddStore(new NamespacedResourceStore<byte[]>(new DllResourceStore("osu.Framework.Design.Desktop.dll"), "Resources"));
 
             // Load fonts
             var fonts = new FontStore(new GlyphStore(Resources, "Fonts/Nunito"));
