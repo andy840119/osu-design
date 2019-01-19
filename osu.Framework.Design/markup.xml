@@ -1,0 +1,6 @@
+<Container xmlns="osufx://osu.Framework/*" RelativeSizeAxes="Both">
+    <Box Name="MyBox" RelativeSizeAxes="Both" Colour="rgba(250,150,100,200)"/>
+    <Container Name="MyContainer" Padding="100,100,100,100" RelativeSizeAxes="Both">
+        <Box RelativeSizeAxes="Both" Colour="#00ff00, #ff00ff, #00ffff, #ff0000"/>
+    </Container>
+</Container>

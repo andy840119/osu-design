@@ -38,6 +38,7 @@ namespace osu.Framework.Design.Workspaces
             Watcher.Deleted += handleFileDeleted;
             Watcher.Renamed += handleFileRenamed;
             Watcher.Changed += handleFileChanged;
+            Watcher.EnableRaisingEvents = true;
 
             foreach (var file in Directory.EnumerateFiles("*", SearchOption.AllDirectories))
                 Documents.Add(new Document(this, file.NameRelativeTo(Directory)));
@@ -86,7 +87,10 @@ namespace osu.Framework.Design.Workspaces
                 var doc = GetDocument(fullName);
 
                 if (doc != null)
+                {
+                    doc.File.Refresh();
                     doc.LastWriteTime.Value = doc.File.LastWriteTime;
+                }
             });
         }
 
