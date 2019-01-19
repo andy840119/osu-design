@@ -111,8 +111,6 @@ namespace osu.Framework.Design.Workspaces
         }
         public Document GetDocument(string fullName) => _docs.FirstOrDefault(d => d.FullName == fullName);
 
-        public void Dispose()
-        {
-        }
+        public void Dispose() => Watcher.Dispose();
     }
 }
