@@ -12,7 +12,7 @@ namespace osu.Framework.Design.Tests
         public void TestGenerate()
         {
             //Given
-            var doc = new DrawableDocument();
+            var doc = new DrawableNode();
             var code =
 @"public class MyContainer : osu.Framework.Graphics.Containers.Container
 {
@@ -65,7 +65,7 @@ namespace osu.Framework.Design.Tests
         [Fact]
         public void TestGenerate2()
         {
-            var doc = new DrawableDocument();
+            var doc = new DrawableNode();
             var code =
 @"public class MyScreen : osu.Framework.Screens.Screen
 {

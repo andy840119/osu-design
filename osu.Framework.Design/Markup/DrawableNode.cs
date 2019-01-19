@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using osu.Framework.Graphics;
@@ -53,6 +54,8 @@ namespace osu.Framework.Design.Markup
             reloadProperties(element);
             reloadChildren(element);
         }
+        public void Load(string text) => Load(XElement.Parse(text));
+        public void LoadFrom(TextReader reader) => Load(XElement.Load(reader));
 
         void reloadProperties(XElement element)
         {

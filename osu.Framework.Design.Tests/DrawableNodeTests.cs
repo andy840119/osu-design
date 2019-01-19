@@ -14,7 +14,7 @@ namespace osu.Framework.Design.Tests
         public void TestLoad()
         {
             //Given
-            var node = new DrawableDocument();
+            var node = new DrawableNode();
 
             //When
             node.Load(@"
@@ -30,7 +30,7 @@ namespace osu.Framework.Design.Tests
         public void TestLoadInvalidContainer()
         {
             //Given
-            var node = new DrawableDocument();
+            var node = new DrawableNode();
 
             //Then
             Assert.Throws<MarkupException>(() => node.Load(@"
@@ -44,7 +44,7 @@ namespace osu.Framework.Design.Tests
         public void TestLoadValidContainer()
         {
             //Given
-            var node = new DrawableDocument();
+            var node = new DrawableNode();
 
             //When
             node.Load(@"
@@ -73,7 +73,7 @@ namespace osu.Framework.Design.Tests
         public void TestEmbeddedProperties()
         {
             //Given
-            var node = new DrawableDocument();
+            var node = new DrawableNode();
 
             //When
             node.Load(@"
@@ -102,7 +102,7 @@ namespace osu.Framework.Design.Tests
         public void TestNonexistentProperty()
         {
             //Given
-            var node = new DrawableDocument();
+            var node = new DrawableNode();
 
             //Then
             Assert.Throws<MarkupException>(() => node.Load(@"
@@ -114,7 +114,7 @@ namespace osu.Framework.Design.Tests
         public void TestInvalidBindingName()
         {
             //Given
-            var node = new DrawableDocument();
+            var node = new DrawableNode();
 
             //When
             node.Load(@"
@@ -129,7 +129,7 @@ namespace osu.Framework.Design.Tests
         public void TestInvalidChildrenProperty()
         {
             //Given
-            var node = new DrawableDocument();
+            var node = new DrawableNode();
 
             //Then
             Assert.Throws<MarkupException>(() => node.Load(@"
