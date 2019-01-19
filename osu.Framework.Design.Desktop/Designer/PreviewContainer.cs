@@ -81,13 +81,13 @@ namespace osu.Framework.Design.Designer
                     try
                     {
                         // Read and parse markup
-                        DrawableData data;
+                        // DrawableNode data;
 
-                        using (var reader = new StringReader(content))
-                            data = new MarkupReader().Read(reader);
+                        // using (var reader = new StringReader(content))
+                        // data = new MarkupReader().Read(reader);
 
                         // Create drawable from markup
-                        Child = data.CreateDrawable();
+                        // Child = data.CreateDrawable();
 
                         _content.FadeIn(30);
 
