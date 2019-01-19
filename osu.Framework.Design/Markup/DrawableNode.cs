@@ -9,8 +9,6 @@ namespace osu.Framework.Design.Markup
 {
     public class DrawableNode : List<DrawableNode>
     {
-        public DrawableDocument Document { get; private set; }
-
         public Type DrawableType { get; set; }
         public string GivenName
         {
@@ -44,12 +42,10 @@ namespace osu.Framework.Design.Markup
             Properties.Add(property);
         }
 
-        public void Load(XElement element, DrawableDocument document)
+        public void Load(XElement element)
         {
-            Document = document;
-
             // Parse type
-            DrawableType = Document.GetDrawableType(
+            DrawableType = DrawableTypeStore.GetDrawable(
                 import: ImportNamespaceInfo.Parse(element.Name.NamespaceName),
                 localName: element.Name.LocalName
             );
@@ -105,7 +101,7 @@ namespace osu.Framework.Design.Markup
 
                 try
                 {
-                    child.Load(childElement, Document);
+                    child.Load(childElement);
                 }
                 catch (Exception e)
                 {
