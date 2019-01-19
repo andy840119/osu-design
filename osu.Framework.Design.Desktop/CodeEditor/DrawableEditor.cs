@@ -85,11 +85,11 @@ namespace osu.Framework.Design.CodeEditor
                                 RelativeSizeAxes = Axes.X,
                                 AutoSizeAxes = Axes.Y,
                                 Direction = FillDirection.Vertical
-                            }
+                            },
+                            _caret = new DrawableCaret()
                         }
                     }
                 },
-                _caret = new DrawableCaret(),
                 _mouse = new MouseInputReceptor
                 {
                     RelativeSizeAxes = Axes.Both,
