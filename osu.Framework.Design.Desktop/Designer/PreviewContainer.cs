@@ -3,7 +3,7 @@ using System.IO;
 using osu.Framework.Allocation;
 using osu.Framework.Configuration;
 using osu.Framework.Design.Markup;
-using osu.Framework.Design.Solution;
+using osu.Framework.Design.Workspaces;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Sprites;

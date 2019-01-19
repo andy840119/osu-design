@@ -8,9 +8,7 @@
       "preLaunchTask": "build",
       "program": "${workspaceFolder}/osu.Framework.Design.Desktop/bin/Debug/netcoreapp2.2/osu.Framework.Design.Desktop.dll",
       "cwd": "${workspaceFolder}/osu.Framework.Design.Desktop",
-      "args": [
-        "${workspaceFolder}/osu.Framework.Design/osu.Framework.Design.Desktop.csproj"
-      ],
+      "args": ["${workspaceFolder}/osu.Framework.Design"],
       "console": "internalConsole",
       "internalConsoleOptions": "openOnSessionStart"
     }

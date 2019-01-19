@@ -3,7 +3,7 @@ using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Configuration;
 using osu.Framework.Design.Designer;
-using osu.Framework.Design.Solution;
+using osu.Framework.Design.Workspaces;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.IO.Stores;
 using osu.Framework.Platform;
@@ -56,11 +56,7 @@ namespace osu.Framework.Design
 
             // Global workspace
             _dependencies.CacheAs<IFileSystem>(_fileSystem = new FileSystem());
-            _dependencies.Cache(_workspace = new Workspace());
-
-            _workspace.Directory.Value = _fileSystem.DirectoryInfo.FromDirectoryName(
-                _fileSystem.Path.GetDirectoryName(_projectPath)
-            );
+            _dependencies.Cache(_workspace = new Workspace(_fileSystem.DirectoryInfo.FromDirectoryName(_projectPath)));
         }
 
         protected override void Update()

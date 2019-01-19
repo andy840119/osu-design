@@ -1,6 +1,6 @@
 using osu.Framework.Allocation;
 using osu.Framework.Design.CodeEditor;
-using osu.Framework.Design.Solution;
+using osu.Framework.Design.Workspaces;
 using osu.Framework.Graphics;
 
 namespace osu.Framework.Design.Designer

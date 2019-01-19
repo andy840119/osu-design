@@ -5,7 +5,10 @@ namespace osu.Framework.Design.Tests.Helpers
 {
     public class MockWorkspace : Workspace
     {
-        public MockWorkspace() : base(new MockFileSystem().GetCurrentDirectory())
+        public MockWorkspace() : base(new MockFileSystem
+        {
+            FileSystemWatcher = new MockFileSystemWatcherFactory()
+        }.GetCurrentDirectory())
         {
         }
     }

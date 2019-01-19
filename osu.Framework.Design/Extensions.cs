@@ -109,5 +109,12 @@ namespace osu.Framework.Design
             // Append a slash only if the path is a directory and does not have a slash.
             return path + Path.DirectorySeparatorChar;
         }
+
+        public static FileSystemWatcherBase CreateWatcher(this DirectoryInfoBase dir)
+        {
+            var watcher = dir.FileSystem.FileSystemWatcher.CreateNew();
+            watcher.Path = dir.FullName;
+            return watcher;
+        }
     }
 }
