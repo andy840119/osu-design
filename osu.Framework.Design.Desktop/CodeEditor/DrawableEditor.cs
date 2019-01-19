@@ -102,8 +102,8 @@ namespace osu.Framework.Design.CodeEditor
             FontFamily.BindValueChanged(f => updateFontCache(), runOnceImmediately: true);
             FontSize.BindValueChanged(f => updateFontCache(), runOnceImmediately: true);
 
-            SelectionStart.BindValueChanged(p => updateCaretPosition(), runOnceImmediately: true);
-            LineNumberWidth.BindValueChanged(w => updateCaretPosition(), runOnceImmediately: true);
+            SelectionStart.BindValueChanged(p => updateCarets(), runOnceImmediately: true);
+            LineNumberWidth.BindValueChanged(w => updateCarets(), runOnceImmediately: true);
         }
 
         protected override void LoadComplete()
@@ -149,12 +149,14 @@ namespace osu.Framework.Design.CodeEditor
                 lineDrawable.Set(parts, index);
                 lineDrawable.LineNumber.Value = i + 1;
 
-                index += parts.Length;
+                index += line.Length;
             }
 
             // Remove unused lines
             while (_flow.Count > lines.Length)
                 _flow.Remove(_flow[lines.Length]);
+
+            updateCarets();
         }
 
         public void Insert(string value) => Insert(value, SelectionStart.Value);
@@ -184,9 +186,14 @@ namespace osu.Framework.Design.CodeEditor
 
         float _charWidth;
 
-        void updateFontCache() => _charWidth = _fontStore.GetCharacter(FontFamily, 'D').DisplayWidth * FontSize;
+        void updateFontCache()
+        {
+            _charWidth = _fontStore.GetCharacter(FontFamily, 'D').DisplayWidth * FontSize;
 
-        void updateCaretPosition()
+            updateCarets();
+        }
+
+        void updateCarets()
         {
             var index = SelectionStart.Value;
 
@@ -211,6 +218,23 @@ namespace osu.Framework.Design.CodeEditor
         bool handleMouseDown(MouseDownEvent e)
         {
             var pos = _flow.ToLocalSpace(e.ScreenSpaceMouseDownPosition);
+
+            for (var i = 0; i < _flow.Count; i++)
+            {
+                if (pos.Y > FontSize && i != _flow.Count - 1)
+                {
+                    pos.Y -= FontSize;
+                    continue;
+                }
+
+                var line = _flow[i];
+                pos.X -= line.TextStartOffset;
+
+                var j = (int)Math.Clamp(Math.Round(pos.X / _charWidth), 0, line.Length - 1);
+
+                SelectionStart.Value = line.StartIndex + j;
+                break;
+            }
 
             return true;
         }
