@@ -38,7 +38,7 @@ namespace osu.Framework.Design.Designer
                 _editor = new DrawableEditor()
             );
 
-            _document.Content.BindValueChanged(_editor.Set, true);
+            _editor.Current.BindTo(_document.Content);
         }
     }
 }

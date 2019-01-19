@@ -7,40 +7,36 @@ using osuTK.Graphics;
 
 namespace osu.Framework.Design.CodeEditor
 {
-    // We simply derive from spritetext because it is already heavily optimised using drawnodes
+    // We simply derive from spritetext because it is already heavily optimized using drawnodes
     public class DrawableWord : SpriteText
     {
-        public int Length => Current.Value.Length;
-
-        public Bindable<SRGBColour> ColourBindable { get; } = new Bindable<SRGBColour>();
-        public Bindable<string> FontFamily { get; } = new Bindable<string>();
-        public BindableFloat FontSize { get; } = new BindableFloat();
-
         public DrawableWord()
         {
             FixedWidth = true;
             Shadow = true;
-
-            Set("");
         }
+
+        Bindable<string> _fontFamily;
+        Bindable<float> _fontSize;
 
         [BackgroundDependencyLoader]
         void load(DrawableEditor editor)
         {
-            ColourBindable.Value = Color4.White;
-            ColourBindable.BindValueChanged(c => this.FadeColour(c, 200), true);
+            _fontFamily = editor.FontFamily.GetBoundCopy();
+            _fontFamily.BindValueChanged(f => Font = f, runOnceImmediately: true);
 
-            FontFamily.BindTo(editor.FontFamily);
-            FontFamily.BindValueChanged(f => Font = f, true);
-
-            FontSize.BindTo(editor.FontSize);
-            FontSize.BindValueChanged(s => TextSize = s, true);
+            _fontSize = editor.FontSize.GetBoundCopy();
+            _fontSize.BindValueChanged(s => TextSize = s, runOnceImmediately: true);
         }
 
-        public void Insert(string value, int index) => Set(Current.Value.Insert(index, value));
-        public void Remove(int count, int index) => Set(Current.Value.Remove(index, count));
+        public int StartIndex { get; private set; }
 
-        public void Set(string text) => Current.Value = text;
+        public void Set(string value, int startIndex)
+        {
+            Current.Value = value;
+
+            StartIndex = startIndex;
+        }
 
         protected override bool UseFixedWidthForCharacter(char c) => true;
     }

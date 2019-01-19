@@ -13,121 +13,60 @@ namespace osu.Framework.Design.CodeEditor
 {
     public class DrawableLine : CompositeDrawable
     {
-        DrawableWord _placeholder;
+        public int Length { get; private set; }
+
         FillFlowContainer<DrawableWord> _flow;
 
-        public int Length => _flow.Sum(w => w.Length);
-        public string Text => string.Concat(_flow.Select(w => w.Current.Value));
-
-        float fixedWidth;
+        public DrawableLineNumber LineNumber { get; private set; }
 
         [BackgroundDependencyLoader]
-        void load(DrawableEditor editor, FontStore fonts)
+        void load()
         {
             AutoSizeAxes = Axes.Both;
-            InternalChildren = new Drawable[]
+            InternalChild = new FillFlowContainer
             {
-                // Placeholder to hold the line height when empty
-                _placeholder = new DrawableWord(),
-
-                _flow = new FillFlowContainer<DrawableWord>
+                AutoSizeAxes = Axes.Both,
+                Direction = FillDirection.Horizontal,
+                Spacing = new Vector2(5),
+                Children = new Drawable[]
                 {
-                    AutoSizeAxes = Axes.Both,
-                    Direction = FillDirection.Horizontal,
-                    LayoutEasing = Easing.OutQuint,
-                    LayoutDuration = 50,
-                    Child = new DrawableWord()
+                    LineNumber = new DrawableLineNumber(),
+                    _flow = new FillFlowContainer<DrawableWord>
+                    {
+                        AutoSizeAxes = Axes.Both,
+                        Direction = FillDirection.Horizontal
+                    }
                 }
             };
-
-            _placeholder.Set(" ");
         }
 
-        public DrawableWord GetWordAtIndex(int index, out int wordIndex, out int charIndex)
+        public float TextStartOffset => _flow.ToSpaceOfOtherDrawable(Vector2.Zero, this).X;
+
+        public int StartIndex { get; private set; }
+
+        public void Set(string[] parts, int startIndex)
         {
-            for (var i = 0; i < _flow.Count; i++)
+            // Add new words or set existing ones
+            var index = 0;
+
+            for (var i = 0; i < parts.Length; i++)
             {
-                var word = _flow[i];
+                var part = parts[i];
 
-                if (index >= word.Length && i != _flow.Count - 1)
-                {
-                    index -= word.Length;
-                    continue;
-                }
+                if (i == _flow.Count)
+                    _flow.Add(new DrawableWord());
 
-                wordIndex = i;
-                charIndex = index;
-                return word;
+                _flow[i].Set(part, index);
+
+                index += part.Length;
             }
 
-            throw new ArgumentOutOfRangeException(nameof(index));
-        }
+            // Remove unused words
+            while (_flow.Count > parts.Length)
+                _flow.Remove(_flow[parts.Length]);
 
-        public void Set(string text)
-        {
-            _flow.Child = new DrawableWord();
-            Insert(text, 0);
-        }
-
-        static readonly Regex _splitRegex = new Regex(@"(?<= )(?=\S)", RegexOptions.Compiled);
-
-        public void Insert(string value, int index)
-        {
-            var word = GetWordAtIndex(index, out var wordIndex, out var charIndex);
-
-            var parts = _splitRegex.Split(value).ToList();
-            var wordParts = _splitRegex.Split(word.Current.Value.Insert(charIndex, parts[0]));
-
-            word.Set(wordParts[0]);
-
-            parts.RemoveAt(0);
-            parts.InsertRange(0, wordParts.Skip(1));
-
-            var drawables = _flow.ToList();
-
-            for (var i = 0; i < parts.Count; i++)
-            {
-                var drawable = new DrawableWord();
-                _flow.Add(drawable);
-
-                drawable.Set(parts[i]);
-                drawables.Insert(wordIndex + i + 1, drawable);
-            }
-
-            foreach (var drawable in _flow)
-                _flow.SetLayoutPosition(drawable, drawables.IndexOf(drawable));
-        }
-
-        public void Remove(int count, int index)
-        {
-            var drawables = _flow.ToList();
-
-            while (count > 0)
-            {
-                var word = GetWordAtIndex(index, out var wordIndex, out var charIndex);
-                var removeable = Math.Min(count, word.Length - charIndex);
-
-                if (removeable == 0)
-                    break;
-
-                if (word.Length == removeable)
-                {
-                    _flow.Remove(word);
-                    drawables.RemoveAt(wordIndex);
-                }
-                else
-                    word.Remove(removeable, charIndex);
-
-                count -= removeable;
-                charIndex = 0;
-            }
-
-            foreach (var drawable in _flow)
-                _flow.SetLayoutPosition(drawable, drawables.IndexOf(drawable));
-
-            // We want to keep at least one word
-            if (_flow.Count == 0)
-                _flow.Add(new DrawableWord());
+            StartIndex = startIndex;
+            Length = parts.Sum(p => p.Length);
         }
     }
 }
