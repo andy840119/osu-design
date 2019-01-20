@@ -101,7 +101,7 @@ namespace osu.Framework.Design.CodeEditor
         {
             public Selection()
             {
-                Alpha = 0.6f;
+                Alpha = 0.4f;
                 Colour = Color4.Purple;
             }
         }
