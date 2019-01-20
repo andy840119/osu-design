@@ -1,3 +1,5 @@
+using osu.Framework.Allocation;
+using osu.Framework.Configuration;
 using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
@@ -9,8 +11,12 @@ namespace osu.Framework.Design.CodeEditor
 {
     public class DrawableCaret : CompositeDrawable
     {
-        public DrawableCaret()
+        readonly SelectionRange _selection;
+
+        public DrawableCaret(SelectionRange selection)
         {
+            _selection = selection;
+
             Masking = true;
             CornerRadius = 1.5f;
 
@@ -22,6 +28,39 @@ namespace osu.Framework.Design.CodeEditor
                 Colour = Color4.White.Opacity(0.8f)
             };
         }
+
+        DrawableEditor _editor;
+        BindableFloat _fontSize;
+        BindableInt _lineNumberWidth;
+        BindableInt _selectionStart;
+
+        [BackgroundDependencyLoader]
+        void load(DrawableEditor editor)
+        {
+            _editor = editor;
+
+            _fontSize = editor.FontSize.GetBoundCopy() as BindableFloat;
+            _fontSize.BindValueChanged(s =>
+            {
+                Size = new Vector2(3, s);
+                updateDrawable();
+            });
+
+            _lineNumberWidth = editor.LineNumberWidth.GetBoundCopy() as BindableInt;
+            _lineNumberWidth.BindValueChanged(w => updateDrawable());
+
+            _selectionStart = _selection.Start.GetBoundCopy() as BindableInt;
+            _selectionStart.BindValueChanged(i => updateDrawable());
+
+            // This updates the caret
+            _fontSize.TriggerChange();
+        }
+
+        void updateDrawable() => this.MoveTo(
+            newPosition: _editor.GetPositionAtIndex(_selectionStart),
+            duration: 100,
+            easing: Easing.OutQuart
+        );
 
         protected override void LoadComplete()
         {

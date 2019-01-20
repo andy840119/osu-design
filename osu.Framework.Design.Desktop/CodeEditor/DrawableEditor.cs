@@ -22,7 +22,6 @@ namespace osu.Framework.Design.CodeEditor
         ScrollContainer _scroll;
         FillFlowContainer<DrawableLine> _flow;
         MouseInputReceptor _mouse;
-        DrawableCaret _caret;
 
         ITextInputSource _textInput;
         FontStore _fontStore;
@@ -44,7 +43,7 @@ namespace osu.Framework.Design.CodeEditor
         public BindableFloat FontSize { get; } = new BindableFloat(20);
         public BindableInt LineNumberWidth { get; } = new BindableInt(5);
 
-        public BindableInt SelectionStart { get; } = new BindableInt();
+        public BindableList<SelectionRange> Selections { get; } = new BindableList<SelectionRange>();
 
         sealed class MouseInputReceptor : Drawable
         {
@@ -74,20 +73,11 @@ namespace osu.Framework.Design.CodeEditor
                     DistanceDecayDrag = 0.008,
                     DistanceDecayScroll = 0.056,
                     DistanceDecayJump = 0.056,
-                    Child = new Container
+                    Child = _flow = new FillFlowContainer<DrawableLine>
                     {
                         RelativeSizeAxes = Axes.X,
                         AutoSizeAxes = Axes.Y,
-                        Children = new Drawable[]
-                        {
-                            _flow = new FillFlowContainer<DrawableLine>
-                            {
-                                RelativeSizeAxes = Axes.X,
-                                AutoSizeAxes = Axes.Y,
-                                Direction = FillDirection.Vertical
-                            },
-                            _caret = new DrawableCaret()
-                        }
+                        Direction = FillDirection.Vertical
                     }
                 },
                 _mouse = new MouseInputReceptor
@@ -102,8 +92,9 @@ namespace osu.Framework.Design.CodeEditor
             FontFamily.BindValueChanged(f => updateFontCache(), runOnceImmediately: true);
             FontSize.BindValueChanged(f => updateFontCache(), runOnceImmediately: true);
 
-            SelectionStart.BindValueChanged(p => updateCarets(), runOnceImmediately: true);
-            LineNumberWidth.BindValueChanged(w => updateCarets(), runOnceImmediately: true);
+            Selections.ItemsAdded += handleSelectionsAdded;
+            Selections.ItemsRemoved += handleSelectionsRemoved;
+            Selections.Add(new SelectionRange());
         }
 
         protected override void LoadComplete()
@@ -155,11 +146,9 @@ namespace osu.Framework.Design.CodeEditor
             // Remove unused lines
             while (_flow.Count > lines.Length)
                 _flow.Remove(_flow[lines.Length]);
-
-            updateCarets();
         }
 
-        public void Insert(string value) => Insert(value, SelectionStart.Value);
+        public void Insert(string value) => Insert(value, Selections[0].Start);
         public void Insert(string value, int index)
         {
             if (string.IsNullOrEmpty(value))
@@ -170,7 +159,7 @@ namespace osu.Framework.Design.CodeEditor
             Current.Value = Current.Value.Insert(index, value);
         }
 
-        public void Remove(int count) => Remove(count, SelectionStart.Value);
+        public void Remove(int count) => Remove(count, Selections[0].Start);
         public void Remove(int count, int index)
         {
             if (index >= Length)
@@ -184,19 +173,12 @@ namespace osu.Framework.Design.CodeEditor
             Current.Value = Current.Value.Remove(index, count);
         }
 
-        float _charWidth;
+        public float CharWidth { get; private set; }
 
-        void updateFontCache()
+        void updateFontCache() => CharWidth = _fontStore.GetCharacter(FontFamily, 'D').DisplayWidth * FontSize;
+
+        public Vector2 GetPositionAtIndex(int index)
         {
-            _charWidth = _fontStore.GetCharacter(FontFamily, 'D').DisplayWidth * FontSize;
-
-            updateCarets();
-        }
-
-        void updateCarets()
-        {
-            var index = SelectionStart.Value;
-
             for (var i = 0; i < _flow.Count; i++)
             {
                 var line = _flow[i];
@@ -207,18 +189,17 @@ namespace osu.Framework.Design.CodeEditor
                     continue;
                 }
 
-                _caret.MoveTo(new Vector2(
-                    x: _charWidth * index + line.TextStartOffset,
+                return new Vector2(
+                    x: CharWidth * index + line.TextStartOffset,
                     y: FontSize.Value * i
-                ), 50, Easing.OutQuint);
-                break;
+                );
             }
+
+            return Vector2.Zero;
         }
 
-        bool handleMouseDown(MouseDownEvent e)
+        public int GetIndexAtPosition(Vector2 pos)
         {
-            var pos = _flow.ToLocalSpace(e.ScreenSpaceMouseDownPosition);
-
             for (var i = 0; i < _flow.Count; i++)
             {
                 if (pos.Y > FontSize && i != _flow.Count - 1)
@@ -230,24 +211,131 @@ namespace osu.Framework.Design.CodeEditor
                 var line = _flow[i];
                 pos.X -= line.TextStartOffset;
 
-                var j = (int)Math.Clamp(Math.Round(pos.X / _charWidth), 0, line.Length - 1);
+                var j = (int)Math.Clamp(Math.Round(pos.X / CharWidth), 0, line.Length - 1);
 
-                SelectionStart.Value = line.StartIndex + j;
-                break;
+                return line.StartIndex + j;
             }
+
+            return 0;
+        }
+
+        public DrawableLine GetLineAtIndex(int index, out int lineIndex, out int indexInLine)
+        {
+            for (var i = 0; i < _flow.Count; i++)
+            {
+                var line = _flow[i];
+
+                if (index >= line.Length && i != _flow.Count - 1)
+                {
+                    index -= line.Length;
+                    continue;
+                }
+
+                lineIndex = i;
+                indexInLine = index;
+                return line;
+            }
+
+            lineIndex = -1;
+            indexInLine = -1;
+            return null;
+        }
+
+        public DrawableLine this[int index] => _flow[index];
+
+        bool handleMouseDown(MouseDownEvent e)
+        {
+            var index = GetIndexAtPosition(_flow.ToLocalSpace(e.ScreenSpaceMouseDownPosition));
+
+            Selections.RemoveAll(s => true);
+
+            // New selection is automatically added
+            var selection = Selections[0];
+
+            selection.Start.Value = index;
+            selection.Length.Value = 0;
 
             return true;
         }
 
-        public bool MoveCaret(int position)
-        {
-            var clamped = Math.Clamp(position, 0, Length);
-            SelectionStart.Value = clamped;
 
-            return clamped == position;
+        readonly Dictionary<SelectionRange, DrawableCaret> _caretDrawables = new Dictionary<SelectionRange, DrawableCaret>();
+        readonly Dictionary<SelectionRange, DrawableSelection> _selectionDrawables = new Dictionary<SelectionRange, DrawableSelection>();
+
+        void handleSelectionsAdded(IEnumerable<SelectionRange> selections)
+        {
+            foreach (var selection in selections)
+            {
+                // Caret drawable
+                _scroll.ScrollContent.Add(_caretDrawables[selection] = new DrawableCaret(selection)
+                {
+                    Depth = -_caretDrawables.Count
+                });
+
+                // Selection drawable
+                _scroll.ScrollContent.Add(_selectionDrawables[selection] = new DrawableSelection(selection)
+                {
+                    Depth = _selectionDrawables.Count
+                });
+            }
         }
-        public bool AdvanceCaret(int count = 1) => MoveCaret(SelectionStart.Value + count);
-        public bool RetreatCaret(int count = 1) => MoveCaret(SelectionStart.Value - count);
+        void handleSelectionsRemoved(IEnumerable<SelectionRange> selections)
+        {
+            foreach (var selection in selections)
+            {
+                // Remove caret
+                _scroll.ScrollContent.Remove(_caretDrawables[selection]);
+                _caretDrawables.Remove(selection);
+
+                // Remove selection
+                _scroll.ScrollContent.Remove(_selectionDrawables[selection]);
+                _selectionDrawables.Remove(selection);
+            }
+
+            // Must have at least one selection
+            if (Selections.Count == 0)
+                Selections.Add(new SelectionRange());
+        }
+
+        public bool AdvanceCaret(int count = 1, bool resetSelection = true)
+        {
+            var advanced = false;
+
+            foreach (var selection in Selections)
+                if (selection.Start + count < Length)
+                {
+                    selection.Start.Value += count;
+
+                    if (resetSelection)
+                        selection.Length.Value = 0;
+                    else
+                        selection.Length.Value -= count;
+
+                    advanced = true;
+                }
+
+            return advanced;
+        }
+
+        public bool RetreatCaret(int count = 1, bool resetSelection = true)
+        {
+            var retreated = false;
+
+            foreach (var selection in Selections)
+                if (selection.Start - count >= 0)
+                {
+                    selection.Start.Value -= count;
+
+                    if (resetSelection)
+                        selection.Length.Value = 0;
+                    else
+                        selection.Length.Value += count;
+
+                    retreated = true;
+                }
+
+            return retreated;
+        }
 
         protected override bool OnKeyDown(KeyDownEvent e)
         {
@@ -256,10 +344,10 @@ namespace osu.Framework.Design.CodeEditor
             switch (e.Key)
             {
                 case Key.Left:
-                    RetreatCaret();
+                    RetreatCaret(resetSelection: !e.ShiftPressed);
                     break;
                 case Key.Right:
-                    AdvanceCaret();
+                    AdvanceCaret(resetSelection: !e.ShiftPressed);
                     break;
                 case Key.BackSpace:
                     if (RetreatCaret())
