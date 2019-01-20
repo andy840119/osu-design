@@ -57,11 +57,16 @@ namespace osu.Framework.Design.CodeEditor
             _fontSize.TriggerChange();
         }
 
-        void updateDrawable() => Position = _editor.GetPositionAtIndex(_selectionEnd);
-
-        protected override void LoadComplete()
+        void updateDrawable()
         {
-            base.LoadComplete();
+            Position = _editor.GetPositionAtIndex(_selectionEnd);
+
+            ResetFlicker();
+        }
+
+        public void ResetFlicker()
+        {
+            FinishTransforms();
 
             this.FadeIn(30)
                 .Delay(500)
