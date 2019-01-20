@@ -139,7 +139,8 @@ namespace osu.Framework.Design.CodeEditor
 
             Selections.ItemsAdded += handleSelectionsAdded;
             Selections.ItemsRemoved += handleSelectionsRemoved;
-            Selections.Add(new SelectionRange(this));
+
+            ScheduleAfterChildren(() => Selections.Add(new SelectionRange(this)));
         }
 
         protected override void LoadComplete()
