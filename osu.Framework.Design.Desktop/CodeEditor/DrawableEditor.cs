@@ -92,7 +92,7 @@ namespace osu.Framework.Design.CodeEditor
                 var index = getIndexAtPosition(e);
                 var selection = _editor.Selections[0];
 
-                selection.Start.Value = index;
+                selection.End.Value = index;
 
                 return true;
             }
@@ -159,7 +159,7 @@ namespace osu.Framework.Design.CodeEditor
             if (!string.IsNullOrEmpty(pending))
             {
                 Insert(pending);
-                AdvanceCaret();
+                AdvanceCaret(pending.Length);
             }
         }
 
@@ -205,7 +205,27 @@ namespace osu.Framework.Design.CodeEditor
             selection.End.MaxValue = Length;
         }
 
-        public void Insert(string value) => Insert(value, Selections[0].Start);
+        public void Insert(string value)
+        {
+            var text = Current.Value;
+
+            foreach (var selection in Selections)
+            {
+                if (selection.Length != 0)
+                {
+                    var start = selection.Length > 0 ? selection.Start : selection.End;
+                    var length = selection.Length > 0 ? selection.Length : -selection.Length;
+
+                    text = text.Remove(start, length);
+
+                    selection.End.Value = selection.Start;
+                }
+
+                text = text.Insert(selection.End, value);
+            }
+
+            Current.Value = text;
+        }
         public void Insert(string value, int index)
         {
             if (string.IsNullOrEmpty(value))
@@ -216,7 +236,6 @@ namespace osu.Framework.Design.CodeEditor
             Current.Value = Current.Value.Insert(index, value);
         }
 
-        public void Remove(int count) => Remove(count, Selections[0].Start);
         public void Remove(int count, int index)
         {
             if (index >= Length)
@@ -349,14 +368,14 @@ namespace osu.Framework.Design.CodeEditor
 
             foreach (var selection in Selections)
             {
-                var before = selection.Start.Value;
+                var before = selection.End.Value;
 
-                selection.Start.Value += count;
+                selection.End.Value += count;
 
                 if (!shift)
-                    selection.End.Value = selection.Start;
+                    selection.Start.Value = selection.End;
 
-                advanced |= before != selection.Start;
+                advanced |= before != selection.End;
             }
 
             return advanced;
@@ -377,11 +396,10 @@ namespace osu.Framework.Design.CodeEditor
                     AdvanceCaret(shift: e.ShiftPressed);
                     break;
                 case Key.BackSpace:
-                    if (RetreatCaret())
-                        Remove(1);
+                    handleDeleteKey(retreat: true);
                     break;
                 case Key.Delete:
-                    Remove(1);
+                    handleDeleteKey();
                     break;
                 case Key.Enter:
                 case Key.KeypadEnter:
@@ -393,6 +411,36 @@ namespace osu.Framework.Design.CodeEditor
             }
 
             return true;
+        }
+
+        void handleDeleteKey(bool retreat = false)
+        {
+            var text = Current.Value;
+
+            foreach (var selection in Selections)
+            {
+                if (selection.Length != 0)
+                {
+                    var start = selection.Length > 0 ? selection.Start : selection.End;
+                    var length = selection.Length > 0 ? selection.Length : -selection.Length;
+
+                    text = text.Remove(start, length);
+
+                    selection.Start.Value = start;
+                    selection.End.Value = start;
+                }
+                else if (retreat && selection.End > 0)
+                {
+                    text = text.Remove(selection.End - 1, 1);
+
+                    selection.End.Value--;
+                    selection.Start.Value = selection.End;
+                }
+                else if (!retreat && selection.End < Length)
+                    text = text.Remove(selection.End, 1);
+            }
+
+            Current.Value = text;
         }
     }
 }

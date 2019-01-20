@@ -33,7 +33,7 @@ namespace osu.Framework.Design.CodeEditor
         DrawableEditor _editor;
         BindableFloat _fontSize;
         BindableInt _lineNumberWidth;
-        BindableInt _selectionStart;
+        BindableInt _selectionEnd;
 
         [BackgroundDependencyLoader]
         void load(DrawableEditor editor)
@@ -50,14 +50,14 @@ namespace osu.Framework.Design.CodeEditor
             _lineNumberWidth = editor.LineNumberWidth.GetBoundCopy() as BindableInt;
             _lineNumberWidth.BindValueChanged(w => updateDrawable());
 
-            _selectionStart = _selection.Start.GetBoundCopy() as BindableInt;
-            _selectionStart.BindValueChanged(i => updateDrawable());
+            _selectionEnd = _selection.End.GetBoundCopy() as BindableInt;
+            _selectionEnd.BindValueChanged(i => updateDrawable());
 
             // This updates the caret
             _fontSize.TriggerChange();
         }
 
-        void updateDrawable() => Position = _editor.GetPositionAtIndex(_selectionStart);
+        void updateDrawable() => Position = _editor.GetPositionAtIndex(_selectionEnd);
 
         protected override void LoadComplete()
         {
