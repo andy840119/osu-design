@@ -1,3 +1,4 @@
+using System;
 using osu.Framework.Allocation;
 using osu.Framework.Configuration;
 using osu.Framework.Extensions.Color4Extensions;
@@ -56,11 +57,7 @@ namespace osu.Framework.Design.CodeEditor
             _fontSize.TriggerChange();
         }
 
-        void updateDrawable() => this.MoveTo(
-            newPosition: _editor.GetPositionAtIndex(_selectionStart),
-            duration: 100,
-            easing: Easing.OutQuart
-        );
+        void updateDrawable() => Position = _editor.GetPositionAtIndex(_selectionStart);
 
         protected override void LoadComplete()
         {

@@ -1,18 +1,20 @@
+using System;
 using osu.Framework.Configuration;
 
 namespace osu.Framework.Design.CodeEditor
 {
     public class SelectionRange
     {
-        public BindableInt Start { get; } = new BindableInt
-        {
-            MinValue = 0
-        };
-        public BindableInt Length { get; } = new BindableInt
-        {
-            MinValue = 0
-        };
+        public BindableInt Start { get; } = new BindableInt();
+        public BindableInt End { get; } = new BindableInt();
 
-        public int End => Start + Length;
+        public int Length => End - Start;
+
+        readonly DrawableEditor _editor;
+
+        public SelectionRange(DrawableEditor editor)
+        {
+            _editor = editor;
+        }
     }
 }

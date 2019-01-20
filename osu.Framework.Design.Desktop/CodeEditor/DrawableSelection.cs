@@ -3,21 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 using osu.Framework.Allocation;
 using osu.Framework.Configuration;
+using osu.Framework.Extensions.Color4Extensions;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osuTK;
-using osuTK.Graphics;
 
 namespace osu.Framework.Design.CodeEditor
 {
     public class DrawableSelection : CompositeDrawable
     {
-        readonly SelectionRange _selectionRange;
+        readonly SelectionRange _selection;
 
         public DrawableSelection(SelectionRange selection)
         {
-            _selectionRange = selection;
+            _selection = selection;
 
             RelativeSizeAxes = Axes.Both;
         }
@@ -26,7 +26,7 @@ namespace osu.Framework.Design.CodeEditor
         BindableFloat _fontSize;
         BindableInt _lineNumberWidth;
         BindableInt _selectionStart;
-        BindableInt _selectionLength;
+        BindableInt _selectionEnd;
 
         [BackgroundDependencyLoader]
         void load(DrawableEditor editor)
@@ -39,11 +39,11 @@ namespace osu.Framework.Design.CodeEditor
             _lineNumberWidth = editor.LineNumberWidth.GetBoundCopy() as BindableInt;
             _lineNumberWidth.BindValueChanged(w => updateDrawables());
 
-            _selectionStart = _selectionRange.Start.GetBoundCopy() as BindableInt;
+            _selectionStart = _selection.Start.GetBoundCopy() as BindableInt;
             _selectionStart.BindValueChanged(i => updateDrawables());
 
-            _selectionLength = _selectionRange.Length.GetBoundCopy() as BindableInt;
-            _selectionLength.BindValueChanged(i => updateDrawables());
+            _selectionEnd = _selection.End.GetBoundCopy() as BindableInt;
+            _selectionEnd.BindValueChanged(i => updateDrawables());
 
             updateDrawables();
         }
@@ -58,25 +58,38 @@ namespace osu.Framework.Design.CodeEditor
                     AddInternal(new Selection());
 
                 var range = ranges[i];
-                var startPos = _editor.GetPositionAtIndex(range.start);
-                var endPos = _editor.GetPositionAtIndex(range.end) + new Vector2(0, _fontSize);
+                var position = _editor.GetPositionAtIndex(range.start);
+                var size = _editor.GetPositionAtIndex(range.end, ignoreEnd: false) + new Vector2(0, _fontSize) - position;
 
                 var selectionDrawable = InternalChildren[i];
 
-                selectionDrawable.Position = startPos;
-                selectionDrawable.Size = endPos - startPos;
+                selectionDrawable.Position = position;
+                selectionDrawable.Size = size;
             }
 
             // Remove unused selections
-            while (InternalChildren.Count > ranges.Length)
+            for (var i = InternalChildren.Count; i > ranges.Length; i--)
                 RemoveInternal(InternalChildren[ranges.Length]);
         }
 
         IEnumerable<(int start, int end)> getBoxRanges()
         {
-            var length = _selectionLength.Value;
+            var length = _selection.Length;
 
-            _editor.GetLineAtIndex(_selectionStart, out var line, out var start);
+            if (length == 0)
+                yield break;
+
+            int line;
+            int start;
+
+            if (length < 0)
+            {
+                // Swap selection start with and end if negative length
+                length = -length;
+                _editor.GetLineAtIndex(_selectionStart.Value - length, out line, out start);
+            }
+            else
+                _editor.GetLineAtIndex(_selectionStart, out line, out start);
 
             for (; length > 0; line++)
             {
@@ -86,9 +99,6 @@ namespace osu.Framework.Design.CodeEditor
                 var startIndex = lineDrawable.StartIndex + start;
                 var endIndex = startIndex + remaining;
 
-                if (length >= remaining)
-                    endIndex--;
-
                 if (startIndex != endIndex)
                     yield return (startIndex, endIndex);
 
@@ -97,12 +107,20 @@ namespace osu.Framework.Design.CodeEditor
             }
         }
 
-        public sealed class Selection : Box
+        public sealed class Selection : CompositeDrawable
         {
             public Selection()
             {
-                Alpha = 0.4f;
-                Colour = Color4.Purple;
+                Masking = true;
+                CornerRadius = 1.5f;
+
+                InternalChild = new Box
+                {
+                    RelativeSizeAxes = Axes.Both,
+                    Colour = DesignerColours.Highlight.Opacity(0.3f),
+                    Anchor = Anchor.Centre,
+                    Origin = Anchor.Centre
+                };
             }
         }
     }

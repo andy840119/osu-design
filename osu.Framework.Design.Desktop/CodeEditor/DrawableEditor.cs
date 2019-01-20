@@ -21,7 +21,7 @@ namespace osu.Framework.Design.CodeEditor
     {
         ScrollContainer _scroll;
         FillFlowContainer<DrawableLine> _flow;
-        MouseInputReceptor _mouse;
+        MouseInputHandler _mouse;
 
         ITextInputSource _textInput;
         FontStore _fontStore;
@@ -45,11 +45,57 @@ namespace osu.Framework.Design.CodeEditor
 
         public BindableList<SelectionRange> Selections { get; } = new BindableList<SelectionRange>();
 
-        sealed class MouseInputReceptor : Drawable
+        sealed class MouseInputHandler : Drawable
         {
-            public Func<MouseDownEvent, bool> MouseDown;
+            DrawableEditor _editor;
 
-            protected override bool OnMouseDown(MouseDownEvent e) => MouseDown?.Invoke(e) ?? false;
+            [BackgroundDependencyLoader]
+            void load(DrawableEditor editor)
+            {
+                _editor = editor;
+            }
+
+            int getIndexAtPosition(MouseEvent e) =>
+                _editor.GetIndexAtPosition(_editor._scroll.ScrollContent.ToLocalSpace(e.ScreenSpaceMousePosition));
+
+            protected override bool OnMouseDown(MouseDownEvent e)
+            {
+                base.OnMouseDown(e);
+
+                _editor.Selections.RemoveAll(s => _editor.Selections.Count != 1);
+
+                var index = getIndexAtPosition(e);
+                var selection = _editor.Selections[0];
+
+                selection.Start.Value = index;
+                selection.End.Value = index;
+
+                return true;
+            }
+
+            protected override bool OnDragStart(DragStartEvent e)
+            {
+                base.OnDragStart(e);
+                return true;
+            }
+
+            protected override bool OnDragEnd(DragEndEvent e)
+            {
+                base.OnDragEnd(e);
+                return true;
+            }
+
+            protected override bool OnDrag(DragEvent e)
+            {
+                base.OnDrag(e);
+
+                var index = getIndexAtPosition(e);
+                var selection = _editor.Selections[0];
+
+                selection.Start.Value = index;
+
+                return true;
+            }
         }
 
         DependencyContainer _dependencies;
@@ -80,10 +126,9 @@ namespace osu.Framework.Design.CodeEditor
                         Direction = FillDirection.Vertical
                     }
                 },
-                _mouse = new MouseInputReceptor
+                _mouse = new MouseInputHandler
                 {
-                    RelativeSizeAxes = Axes.Both,
-                    MouseDown = handleMouseDown
+                    RelativeSizeAxes = Axes.Both
                 }
             };
 
@@ -94,7 +139,7 @@ namespace osu.Framework.Design.CodeEditor
 
             Selections.ItemsAdded += handleSelectionsAdded;
             Selections.ItemsRemoved += handleSelectionsRemoved;
-            Selections.Add(new SelectionRange());
+            Selections.Add(new SelectionRange(this));
         }
 
         protected override void LoadComplete()
@@ -118,7 +163,7 @@ namespace osu.Framework.Design.CodeEditor
             }
         }
 
-        static readonly Regex _lineSplitRegex = new Regex(@"(?<=[\r\n])", RegexOptions.Compiled);
+        static readonly Regex _lineSplitRegex = new Regex(@"\r?(?<=\n)", RegexOptions.Compiled);
         static readonly Regex _wordSplitRegex = new Regex(@"(?<= )(?=\S)", RegexOptions.Compiled);
 
         void updateText(string text)
@@ -146,6 +191,18 @@ namespace osu.Framework.Design.CodeEditor
             // Remove unused lines
             while (_flow.Count > lines.Length)
                 _flow.Remove(_flow[lines.Length]);
+
+            foreach (var selection in Selections)
+                updateSelectionLimits(selection);
+        }
+
+        void updateSelectionLimits(SelectionRange selection)
+        {
+            selection.Start.MinValue = 0;
+            selection.Start.MaxValue = Length;
+
+            selection.End.MinValue = 0;
+            selection.End.MaxValue = Length;
         }
 
         public void Insert(string value) => Insert(value, Selections[0].Start);
@@ -177,13 +234,13 @@ namespace osu.Framework.Design.CodeEditor
 
         void updateFontCache() => CharWidth = _fontStore.GetCharacter(FontFamily, 'D').DisplayWidth * FontSize;
 
-        public Vector2 GetPositionAtIndex(int index)
+        public Vector2 GetPositionAtIndex(int index, bool ignoreEnd = true)
         {
             for (var i = 0; i < _flow.Count; i++)
             {
                 var line = _flow[i];
 
-                if (index >= line.Length && i != _flow.Count - 1)
+                if ((index > line.Length || ignoreEnd && index == line.Length) && i != _flow.Count - 1)
                 {
                     index -= line.Length;
                     continue;
@@ -211,7 +268,10 @@ namespace osu.Framework.Design.CodeEditor
                 var line = _flow[i];
                 pos.X -= line.TextStartOffset;
 
-                var j = (int)Math.Clamp(Math.Round(pos.X / CharWidth), 0, line.Length - 1);
+                var j = (int)Math.Clamp(Math.Round(pos.X / CharWidth), 0, line.Length);
+
+                if (i != _flow.Count - 1)
+                    j = Math.Min(j, line.Length - 1);
 
                 return line.StartIndex + j;
             }
@@ -243,22 +303,6 @@ namespace osu.Framework.Design.CodeEditor
 
         public DrawableLine this[int index] => _flow[index];
 
-        bool handleMouseDown(MouseDownEvent e)
-        {
-            var index = GetIndexAtPosition(_flow.ToLocalSpace(e.ScreenSpaceMouseDownPosition));
-
-            Selections.RemoveAll(s => true);
-
-            // New selection is automatically added
-            var selection = Selections[0];
-
-            selection.Start.Value = index;
-            selection.Length.Value = 0;
-
-            return true;
-        }
-
-
         readonly Dictionary<SelectionRange, DrawableCaret> _caretDrawables = new Dictionary<SelectionRange, DrawableCaret>();
         readonly Dictionary<SelectionRange, DrawableSelection> _selectionDrawables = new Dictionary<SelectionRange, DrawableSelection>();
 
@@ -266,6 +310,8 @@ namespace osu.Framework.Design.CodeEditor
         {
             foreach (var selection in selections)
             {
+                updateSelectionLimits(selection);
+
                 // Caret drawable
                 _scroll.ScrollContent.Add(_caretDrawables[selection] = new DrawableCaret(selection)
                 {
@@ -294,48 +340,29 @@ namespace osu.Framework.Design.CodeEditor
 
             // Must have at least one selection
             if (Selections.Count == 0)
-                Selections.Add(new SelectionRange());
+                Selections.Add(new SelectionRange(this));
         }
 
-        public bool AdvanceCaret(int count = 1, bool resetSelection = true)
+        public bool AdvanceCaret(int count = 1, bool shift = false)
         {
             var advanced = false;
 
             foreach (var selection in Selections)
-                if (selection.Start + count < Length)
-                {
-                    selection.Start.Value += count;
+            {
+                var before = selection.Start.Value;
 
-                    if (resetSelection)
-                        selection.Length.Value = 0;
-                    else
-                        selection.Length.Value -= count;
+                selection.Start.Value += count;
 
-                    advanced = true;
-                }
+                if (!shift)
+                    selection.End.Value = selection.Start;
+
+                advanced |= before != selection.Start;
+            }
 
             return advanced;
         }
 
-        public bool RetreatCaret(int count = 1, bool resetSelection = true)
-        {
-            var retreated = false;
-
-            foreach (var selection in Selections)
-                if (selection.Start - count >= 0)
-                {
-                    selection.Start.Value -= count;
-
-                    if (resetSelection)
-                        selection.Length.Value = 0;
-                    else
-                        selection.Length.Value += count;
-
-                    retreated = true;
-                }
-
-            return retreated;
-        }
+        public bool RetreatCaret(int count = 1, bool shift = false) => AdvanceCaret(-count, shift);
 
         protected override bool OnKeyDown(KeyDownEvent e)
         {
@@ -344,10 +371,10 @@ namespace osu.Framework.Design.CodeEditor
             switch (e.Key)
             {
                 case Key.Left:
-                    RetreatCaret(resetSelection: !e.ShiftPressed);
+                    RetreatCaret(shift: e.ShiftPressed);
                     break;
                 case Key.Right:
-                    AdvanceCaret(resetSelection: !e.ShiftPressed);
+                    AdvanceCaret(shift: e.ShiftPressed);
                     break;
                 case Key.BackSpace:
                     if (RetreatCaret())
