@@ -35,6 +35,9 @@ namespace osu.Framework.Design.Markup
                 if (matchingTypes.Length == 1)
                     return matchingTypes[0];
 
+                if (matchingTypes.Length == 0)
+                    throw new KeyNotFoundException($"Type '{localName}' could not be found in assembly '{import.AssemblyName}'.");
+
                 throw new AmbiguousMatchException(
                     $"Drawable '{localName}' is ambiguous between the following types: " +
                     string.Join(", ", matchingTypes.Select(t => t.FullName))
