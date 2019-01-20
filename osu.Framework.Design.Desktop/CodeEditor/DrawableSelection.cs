@@ -107,20 +107,11 @@ namespace osu.Framework.Design.CodeEditor
             }
         }
 
-        public sealed class Selection : CompositeDrawable
+        public sealed class Selection : Box
         {
             public Selection()
             {
-                Masking = true;
-                CornerRadius = 1.5f;
-
-                InternalChild = new Box
-                {
-                    RelativeSizeAxes = Axes.Both,
-                    Colour = DesignerColours.Highlight.Opacity(0.3f),
-                    Anchor = Anchor.Centre,
-                    Origin = Anchor.Centre
-                };
+                Colour = DesignerColours.Highlight.Opacity(0.3f);
             }
         }
     }
