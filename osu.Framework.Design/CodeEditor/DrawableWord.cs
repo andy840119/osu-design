@@ -48,7 +48,7 @@ namespace osu.Framework.Design.CodeEditor
 
         void updateStyle(HighlightStyle style)
         {
-            this.FadeColour(style.Color, duration: 50);
+            Colour = style.Color;
         }
 
         public int StartIndex { get; private set; }
