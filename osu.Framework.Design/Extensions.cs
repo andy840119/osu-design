@@ -10,6 +10,15 @@ namespace osu.Framework.Design
 {
     public static class Extensions
     {
+        public static int CountStart(this string str, char character, int startIndex = 0)
+        {
+            for (var i = startIndex; i < str.Length; i++)
+                if (str[i] != character)
+                    return i - startIndex;
+
+            return 0;
+        }
+
         static readonly Regex _spaceRegex = new Regex(@"\s", RegexOptions.Compiled);
 
         public static string RemoveAllSpaces(this string str) => _spaceRegex.Replace(str, "");

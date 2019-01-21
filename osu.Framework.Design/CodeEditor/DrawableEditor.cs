@@ -54,6 +54,7 @@ namespace osu.Framework.Design.CodeEditor
         };
         public BindableBool UseSpacesAsTabs { get; } = new BindableBool(true);
         public BindableList<SelectionRange> Selections { get; } = new BindableList<SelectionRange>();
+        public BindableBool AutoIndent { get; } = new BindableBool(true);
 
         sealed class MouseInputHandler : Drawable
         {
@@ -577,8 +578,10 @@ namespace osu.Framework.Design.CodeEditor
                     break;
                 case Key.Enter:
                 case Key.KeypadEnter:
-                    Insert("\n");
-                    AdvanceCaret();
+                    InsertNewLine(
+                        advance: !e.ControlPressed,
+                        passThrough: e.ShiftPressed
+                    );
                     break;
                 case Key.Tab:
                     if (UseSpacesAsTabs)
@@ -597,6 +600,45 @@ namespace osu.Framework.Design.CodeEditor
             }
 
             return true;
+        }
+
+        public void InsertNewLine(bool advance = true, bool passThrough = false)
+        {
+            var offset = 0;
+
+            foreach (var selection in Selections)
+            {
+                if (selection.Length != 0)
+                {
+                    var start = (selection.Length > 0 ? selection.Start : selection.End) + offset;
+                    var length = selection.Length > 0 ? selection.Length : -selection.Length;
+
+                    Current.Value = Current.Value.Remove(start, length);
+
+                    selection.Start.Value = start;
+                    selection.End.Value = start;
+                }
+
+                var indents = Current.Value.CountStart(' ', GetLineAtIndex(selection.End, out _, out _).StartIndex);
+                string newline;
+
+                if (AutoIndent)
+                    newline = '\n' + new string(' ', indents);
+                else
+                    newline = "\n";
+
+                if (passThrough)
+                {
+                }
+                else if (advance)
+                {
+                    Current.Value = Current.Value.Insert(selection.End, newline);
+                    AdvanceCaret(newline.Length);
+                }
+                else continue;
+
+                offset += newline.Length;
+            }
         }
 
         void handleDeleteKey(bool retreat = false)
