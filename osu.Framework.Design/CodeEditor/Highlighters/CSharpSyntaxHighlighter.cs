@@ -6,7 +6,7 @@ namespace osu.Framework.Design.CodeEditor.Highlighters
     public class CSharpSyntaxHighlighter : SyntaxHighlighter
     {
         static readonly Regex _stringRegex = new Regex(
-            @"'(?>(?:\\[^\r\n]|[^'\r\n])*)'?|(?<verbatim>@)?""(?>(?:(?(verbatim)""""|\\.)|[^""])*)",
+            @"'(?>(?:\\[^\r\n]|[^'\r\n])*)'?|(?<verbatim>@)?""(?>(?:(?(verbatim)""""|\\.)|[^""])*)""",
             options: RegexOptions.ExplicitCapture | RegexOptions.Singleline | RegexOptions.Compiled
         );
         static readonly Regex _singlelineCommentRegex = new Regex(
