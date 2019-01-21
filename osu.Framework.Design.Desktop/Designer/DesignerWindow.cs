@@ -39,6 +39,7 @@ namespace osu.Framework.Design.Designer
             );
 
             _editor.Current.BindTo(_document.Content);
+            _editor.SyntaxHighlighter.Value = new CodeEditor.Highlighters.CSharpSyntaxHighlighter();
         }
     }
 }
