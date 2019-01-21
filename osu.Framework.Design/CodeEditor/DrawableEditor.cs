@@ -48,7 +48,11 @@ namespace osu.Framework.Design.CodeEditor
         public Bindable<ISyntaxHighlighter> SyntaxHighlighter { get; } = new Bindable<ISyntaxHighlighter>(new SyntaxHighlighter());
         public Bindable<HighlightStyleCollection> HighlightStyles { get; } = new Bindable<HighlightStyleCollection>(HighlightStyleCollection.Default);
         public Bindable<HighlightStyle> DefaultHighlightStyle { get; } = new Bindable<HighlightStyle>(new HighlightStyle(Color4.White, HighlightFont.Normal));
-
+        public BindableInt TabSize { get; } = new BindableInt(4)
+        {
+            MinValue = 1
+        };
+        public BindableBool UseSpacesAsTabs { get; } = new BindableBool(true);
         public BindableList<SelectionRange> Selections { get; } = new BindableList<SelectionRange>();
 
         sealed class MouseInputHandler : Drawable
@@ -517,6 +521,18 @@ namespace osu.Framework.Design.CodeEditor
                 case Key.KeypadEnter:
                     Insert("\n");
                     AdvanceCaret();
+                    break;
+                case Key.Tab:
+                    if (UseSpacesAsTabs)
+                    {
+                        Insert(new string(' ', TabSize));
+                        AdvanceCaret(TabSize);
+                    }
+                    else
+                    {
+                        Insert("\t");
+                        AdvanceCaret();
+                    }
                     break;
                 default:
                     return false;
