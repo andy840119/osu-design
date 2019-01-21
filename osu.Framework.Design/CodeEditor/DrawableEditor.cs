@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using osu.Framework.Allocation;
 using osu.Framework.Configuration;
+using osu.Framework.Design.CodeEditor.Highlighters;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.UserInterface;
@@ -12,6 +13,7 @@ using osu.Framework.Input;
 using osu.Framework.Input.Events;
 using osu.Framework.IO.Stores;
 using osu.Framework.Platform;
+using osu.Framework.Threading;
 using osuTK;
 using osuTK.Input;
 
@@ -42,6 +44,8 @@ namespace osu.Framework.Design.CodeEditor
         public Bindable<string> FontFamily { get; } = new Bindable<string>("Inconsolata");
         public BindableFloat FontSize { get; } = new BindableFloat(20);
         public BindableInt LineNumberWidth { get; } = new BindableInt(5);
+        public Bindable<ISyntaxHighlighter> SyntaxHighlighter { get; } = new Bindable<ISyntaxHighlighter>(new SyntaxHighlighter());
+        public Bindable<EditorColours> Colours { get; } = new Bindable<EditorColours>(EditorColours.Default);
 
         public BindableList<SelectionRange> Selections { get; } = new BindableList<SelectionRange>();
 
@@ -96,7 +100,7 @@ namespace osu.Framework.Design.CodeEditor
                 base.OnDoubleClick(e);
 
                 var selection = _editor.EnsureOneSelection();
-                var word = _editor.GetLineAtIndex(_clickIndex, out _, out var index).GetWordInIndex(index, out _, out index);
+                var word = _editor.GetLineAtIndex(_clickIndex, out _, out var index).GetWordAtIndex(index, out _, out index);
 
                 selection.Start.Value = word.StartIndex;
                 selection.End.Value = word.EndIndex;
@@ -126,8 +130,8 @@ namespace osu.Framework.Design.CodeEditor
 
                 if (_doubleClicking)
                 {
-                    var currentWord = _editor.GetLineAtIndex(index, out _, out index).GetWordInIndex(index, out _, out index);
-                    var startWord = _editor.GetLineAtIndex(_clickIndex, out _, out var clickIndex).GetWordInIndex(clickIndex, out _, out clickIndex);
+                    var currentWord = _editor.GetLineAtIndex(index, out _, out index).GetWordAtIndex(index, out _, out index);
+                    var startWord = _editor.GetLineAtIndex(_clickIndex, out _, out var clickIndex).GetWordAtIndex(clickIndex, out _, out clickIndex);
 
                     if (currentWord.StartIndex < startWord.StartIndex)
                     {
@@ -181,13 +185,16 @@ namespace osu.Framework.Design.CodeEditor
                 }
             };
 
-            Current.BindValueChanged(t => updateText(), runOnceImmediately: true);
-
-            FontFamily.BindValueChanged(f => updateFontCache(), runOnceImmediately: true);
-            FontSize.BindValueChanged(f => updateFontCache(), runOnceImmediately: true);
+            FontFamily.BindValueChanged(f => updateFontCache());
+            FontSize.BindValueChanged(f => updateFontCache());
+            updateFontCache();
 
             Selections.ItemsAdded += handleSelectionsAdded;
             Selections.ItemsRemoved += handleSelectionsRemoved;
+
+            SyntaxHighlighter.BindValueChanged(h => updateText());
+            Current.BindValueChanged(t => updateText());
+            updateText();
 
             ScheduleAfterChildren(() => EnsureOneSelection());
         }
@@ -214,7 +221,6 @@ namespace osu.Framework.Design.CodeEditor
         }
 
         static readonly Regex _lineSplitRegex = new Regex(@"\r?(?<=\n)", RegexOptions.Compiled);
-        static readonly Regex _wordSplitRegex = new Regex(@"(?<= )(?=\S)", RegexOptions.Compiled);
 
         void updateText()
         {
@@ -226,13 +232,13 @@ namespace osu.Framework.Design.CodeEditor
             for (var i = 0; i < lines.Length; i++)
             {
                 var line = lines[i];
-                var parts = _wordSplitRegex.Split(line);
+                var tokens = SyntaxHighlighter.Value.Tokenize(line);
 
                 if (i == _flow.Count)
                     _flow.Add(new DrawableLine());
 
                 var lineDrawable = _flow[i];
-                lineDrawable.Set(parts, index);
+                lineDrawable.Set(tokens, index);
                 lineDrawable.LineNumber.Value = i + 1;
 
                 index += line.Length;
@@ -244,6 +250,8 @@ namespace osu.Framework.Design.CodeEditor
 
             foreach (var selection in Selections)
                 updateSelectionLimits(selection);
+
+            scheduleHighlight();
         }
 
         void updateSelectionLimits(SelectionRange selection)
@@ -255,6 +263,41 @@ namespace osu.Framework.Design.CodeEditor
             selection.End.MaxValue = Length;
 
             _caretDrawables[selection].ResetFlicker();
+        }
+
+        ScheduledDelegate _highlightTask;
+
+        void scheduleHighlight()
+        {
+            _highlightTask?.Cancel();
+            _highlightTask = Scheduler.AddDelayed(highlightCurrent, timeUntilRun: 500);
+        }
+
+        void highlightCurrent()
+        {
+            var ranges = SyntaxHighlighter.Value.Highlight(Current).ToList();
+
+            for (var i = 0; i < _flow.Count; i++)
+            {
+                var line = _flow[i];
+
+                for (var j = 0; j < line.Count; j++)
+                {
+                    var word = line[j];
+                    var rangeIndex = ranges.FindIndex(r => r.Start <= word.StartIndex && word.EndIndex <= r.End);
+
+                    if (rangeIndex == -1)
+                        continue;
+
+                    var range = ranges[rangeIndex];
+
+                    if (Colours.Value.TryGetValue(range.Style.Type, out var color))
+                        word.FadeColour(color, duration: 100);
+
+                    if (word.EndIndex == range.End)
+                        ranges.RemoveAt(rangeIndex);
+                }
+            }
         }
 
         public void Insert(string value)
