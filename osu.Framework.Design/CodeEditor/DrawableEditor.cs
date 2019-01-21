@@ -488,7 +488,7 @@ namespace osu.Framework.Design.CodeEditor
                 Selections.Add(new SelectionRange(this));
         }
 
-        public bool AdvanceCaret(int count = 1, bool shift = false)
+        public bool AdvanceCaret(int count = 1, bool roundToWord = false, bool keepSelection = false)
         {
             var advanced = false;
 
@@ -498,7 +498,15 @@ namespace osu.Framework.Design.CodeEditor
 
                 selection.End.Value += count;
 
-                if (!shift)
+                if (roundToWord)
+                {
+                    var line = GetLineAtIndex(selection.End, out _, out var indexInLine);
+                    var word = line.GetWordAtIndex(indexInLine, out _, out _);
+
+                    selection.End.Value = selection.Length >= 0 ? word.EndIndex : word.StartIndex;
+                }
+
+                if (!keepSelection)
                     selection.Start.Value = selection.End;
 
                 GetLineAtIndex(selection.End, out _, out selection.IndexInLine);
@@ -509,9 +517,9 @@ namespace osu.Framework.Design.CodeEditor
             return advanced;
         }
 
-        public bool RetreatCaret(int count = 1, bool shift = false) => AdvanceCaret(-count, shift);
+        public bool RetreatCaret(int count = 1, bool roundToWord = false, bool keepSelection = false) => AdvanceCaret(-count, roundToWord, keepSelection);
 
-        public bool AdvanceCaretVertical(int count = 1, bool shift = false)
+        public bool AdvanceCaretVertical(int roundToWord = 1, bool keepSelection = false)
         {
             var advanced = false;
 
@@ -521,13 +529,13 @@ namespace osu.Framework.Design.CodeEditor
 
                 var line = GetLineAtIndex(selection.End, out var lineIndex, out _);
 
-                lineIndex = Math.Clamp(lineIndex + count, 0, _flow.Count - 1);
+                lineIndex = Math.Clamp(lineIndex + roundToWord, 0, _flow.Count - 1);
                 line = _flow[lineIndex];
                 var indexInLine = Math.Clamp(selection.IndexInLine, 0, lineIndex == _flow.Count - 1 ? line.Length : line.Length - 1);
 
                 selection.End.Value = line.StartIndex + indexInLine;
 
-                if (!shift)
+                if (!keepSelection)
                     selection.Start.Value = selection.End;
 
                 advanced |= before != selection.End;
@@ -535,7 +543,7 @@ namespace osu.Framework.Design.CodeEditor
 
             return advanced;
         }
-        public bool RetreatCaretVertical(int count = 1, bool shift = false) => AdvanceCaretVertical(-count, shift);
+        public bool RetreatCaretVertical(int roundToWord = 1, bool keepSelection = false) => AdvanceCaretVertical(-roundToWord, keepSelection);
 
         protected override bool OnKeyDown(KeyDownEvent e)
         {
@@ -544,22 +552,22 @@ namespace osu.Framework.Design.CodeEditor
             switch (e.Key)
             {
                 case Key.Left:
-                    RetreatCaret(shift: e.ShiftPressed);
+                    RetreatCaret(roundToWord: e.ControlPressed, keepSelection: e.ShiftPressed);
                     break;
                 case Key.Right:
-                    AdvanceCaret(shift: e.ShiftPressed);
+                    AdvanceCaret(roundToWord: e.ControlPressed, keepSelection: e.ShiftPressed);
                     break;
                 case Key.Up:
                     if (e.ControlPressed)
                         _scroll.ScrollBy(-FontSize);
                     else
-                        RetreatCaretVertical(shift: e.ShiftPressed);
+                        RetreatCaretVertical(keepSelection: e.ShiftPressed);
                     break;
                 case Key.Down:
                     if (e.ControlPressed)
                         _scroll.ScrollBy(FontSize);
                     else
-                        AdvanceCaretVertical(shift: e.ShiftPressed);
+                        AdvanceCaretVertical(keepSelection: e.ShiftPressed);
                     break;
                 case Key.BackSpace:
                     handleDeleteKey(retreat: true);
