@@ -47,6 +47,7 @@ namespace osu.Framework.Design.CodeEditor
         public BindableInt LineNumberWidth { get; } = new BindableInt(5);
         public Bindable<ISyntaxHighlighter> SyntaxHighlighter { get; } = new Bindable<ISyntaxHighlighter>(new SyntaxHighlighter());
         public Bindable<HighlightStyleCollection> HighlightStyles { get; } = new Bindable<HighlightStyleCollection>(HighlightStyleCollection.Default);
+        public Bindable<HighlightStyle> DefaultHighlightStyle { get; } = new Bindable<HighlightStyle>(new HighlightStyle(Color4.White, HighlightFont.Normal));
 
         public BindableList<SelectionRange> Selections { get; } = new BindableList<SelectionRange>();
 
@@ -288,14 +289,17 @@ namespace osu.Framework.Design.CodeEditor
                     var rangeIndex = ranges.FindIndex(r => r.Start <= word.StartIndex && word.EndIndex <= r.End);
 
                     if (rangeIndex == -1)
+                    {
+                        word.ResetStyle();
                         continue;
+                    }
 
                     var range = ranges[rangeIndex];
 
                     if (HighlightStyles.Value.TryGetValue(range.Type, out var style))
-                        word.FadeColour(style.Color, duration: 100);
+                        word.SetStyle(style);
                     else
-                        word.FadeColour(Color4.White, duration: 100);
+                        word.ResetStyle();
 
                     if (word.EndIndex == range.End)
                         ranges.RemoveAt(rangeIndex);

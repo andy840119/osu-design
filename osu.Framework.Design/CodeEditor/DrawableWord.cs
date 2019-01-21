@@ -12,23 +12,43 @@ namespace osu.Framework.Design.CodeEditor
     {
         public int Length => Current.Value.Length;
 
+        public Bindable<HighlightStyle> Style { get; } = new Bindable<HighlightStyle>();
+
         public DrawableWord()
         {
             FixedWidth = true;
             Shadow = true;
         }
 
+        DrawableEditor _editor;
         Bindable<string> _fontFamily;
         Bindable<float> _fontSize;
 
         [BackgroundDependencyLoader]
         void load(DrawableEditor editor)
         {
+            _editor = editor;
+
             _fontFamily = editor.FontFamily.GetBoundCopy();
             _fontFamily.BindValueChanged(f => Font = f, runOnceImmediately: true);
 
             _fontSize = editor.FontSize.GetBoundCopy();
             _fontSize.BindValueChanged(s => TextSize = s, runOnceImmediately: true);
+
+            Style.BindValueChanged(updateStyle);
+            ResetStyle();
+        }
+
+        public void ResetStyle() => Style.BindTo(_editor.DefaultHighlightStyle);
+        public void SetStyle(HighlightStyle style)
+        {
+            Style.UnbindBindings();
+            Style.Value = style;
+        }
+
+        void updateStyle(HighlightStyle style)
+        {
+            this.FadeColour(style.Color, duration: 50);
         }
 
         public int StartIndex { get; private set; }
