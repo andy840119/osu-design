@@ -70,7 +70,7 @@ namespace osu.Framework.Design.CodeEditor
             Length = parts.Sum(p => p.Length);
         }
 
-        public DrawableWord GetWordInIndex(int index, out int wordIndex, out int indexInWord)
+        public DrawableWord GetWordAtIndex(int index, out int wordIndex, out int indexInWord)
         {
             for (var i = 0; i < _flow.Count; i++)
             {
