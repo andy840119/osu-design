@@ -9,15 +9,11 @@ namespace osu.Framework.Design.Designer
     {
         public Direction Direction { get; set; }
 
-        public HalvedContainer()
-        {
-            RelativeSizeAxes = Axes.Both;
-        }
-        public HalvedContainer(Drawable full) : this()
+        public HalvedContainer(Drawable full)
         {
             Set(full);
         }
-        public HalvedContainer(Direction dir, Drawable first, Drawable second) : this()
+        public HalvedContainer(Direction dir, Drawable first, Drawable second)
         {
             Direction = dir;
 

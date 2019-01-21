@@ -28,7 +28,10 @@ namespace osu.Framework.Design.Designer
                     }
                 },
                 _designerContainer = new Container<DesignerWindow>()
-            );
+            )
+            {
+                RelativeSizeAxes = Axes.Both
+            };
         }
     }
 }
