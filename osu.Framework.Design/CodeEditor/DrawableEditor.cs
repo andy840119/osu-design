@@ -550,10 +550,16 @@ namespace osu.Framework.Design.CodeEditor
                     AdvanceCaret(shift: e.ShiftPressed);
                     break;
                 case Key.Up:
-                    RetreatCaretVertical(shift: e.ShiftPressed);
+                    if (e.ControlPressed)
+                        _scroll.ScrollBy(-FontSize);
+                    else
+                        RetreatCaretVertical(shift: e.ShiftPressed);
                     break;
                 case Key.Down:
-                    AdvanceCaretVertical(shift: e.ShiftPressed);
+                    if (e.ControlPressed)
+                        _scroll.ScrollBy(FontSize);
+                    else
+                        AdvanceCaretVertical(shift: e.ShiftPressed);
                     break;
                 case Key.BackSpace:
                     handleDeleteKey(retreat: true);
