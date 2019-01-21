@@ -81,6 +81,7 @@ namespace osu.Framework.Design.CodeEditor
 
                 selection.Start.Value = _clickIndex;
                 selection.End.Value = _clickIndex;
+                _editor.GetLineAtIndex(selection.End, out _, out selection.IndexInLine);
 
                 return true;
             }
@@ -110,6 +111,7 @@ namespace osu.Framework.Design.CodeEditor
 
                 selection.Start.Value = word.StartIndex;
                 selection.End.Value = word.EndIndex;
+                _editor.GetLineAtIndex(selection.End, out _, out selection.IndexInLine);
 
                 _doubleClicking = true;
                 return true;
@@ -152,6 +154,8 @@ namespace osu.Framework.Design.CodeEditor
                 }
                 else
                     selection.End.Value = index;
+
+                _editor.GetLineAtIndex(selection.End, out _, out selection.IndexInLine);
 
                 return true;
             }
@@ -497,6 +501,8 @@ namespace osu.Framework.Design.CodeEditor
                 if (!shift)
                     selection.Start.Value = selection.End;
 
+                GetLineAtIndex(selection.End, out _, out selection.IndexInLine);
+
                 advanced |= before != selection.End;
             }
 
@@ -504,6 +510,32 @@ namespace osu.Framework.Design.CodeEditor
         }
 
         public bool RetreatCaret(int count = 1, bool shift = false) => AdvanceCaret(-count, shift);
+
+        public bool AdvanceCaretVertical(int count = 1, bool shift = false)
+        {
+            var advanced = false;
+
+            foreach (var selection in Selections)
+            {
+                var before = selection.End.Value;
+
+                var line = GetLineAtIndex(selection.End, out var lineIndex, out _);
+
+                lineIndex = Math.Clamp(lineIndex + count, 0, _flow.Count - 1);
+                line = _flow[lineIndex];
+                var indexInLine = Math.Clamp(selection.IndexInLine, 0, lineIndex == _flow.Count - 1 ? line.Length : line.Length - 1);
+
+                selection.End.Value = line.StartIndex + indexInLine;
+
+                if (!shift)
+                    selection.Start.Value = selection.End;
+
+                advanced |= before != selection.End;
+            }
+
+            return advanced;
+        }
+        public bool RetreatCaretVertical(int count = 1, bool shift = false) => AdvanceCaretVertical(-count, shift);
 
         protected override bool OnKeyDown(KeyDownEvent e)
         {
@@ -516,6 +548,12 @@ namespace osu.Framework.Design.CodeEditor
                     break;
                 case Key.Right:
                     AdvanceCaret(shift: e.ShiftPressed);
+                    break;
+                case Key.Up:
+                    RetreatCaretVertical(shift: e.ShiftPressed);
+                    break;
+                case Key.Down:
+                    AdvanceCaretVertical(shift: e.ShiftPressed);
                     break;
                 case Key.BackSpace:
                     handleDeleteKey(retreat: true);
@@ -572,6 +610,8 @@ namespace osu.Framework.Design.CodeEditor
                 }
                 else if (!retreat && selection.End < Length)
                     text = text.Remove(selection.End, 1);
+
+                GetLineAtIndex(selection.End, out _, out selection.IndexInLine);
             }
 
             Current.Value = text;

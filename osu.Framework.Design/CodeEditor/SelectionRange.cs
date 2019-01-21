@@ -5,6 +5,8 @@ namespace osu.Framework.Design.CodeEditor
 {
     public class SelectionRange
     {
+        public int IndexInLine;
+
         public BindableInt Start { get; } = new BindableInt();
         public BindableInt End { get; } = new BindableInt();
 
