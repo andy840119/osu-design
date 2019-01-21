@@ -282,7 +282,7 @@ namespace osu.Framework.Design.CodeEditor
         void scheduleHighlight()
         {
             _highlightTask?.Cancel();
-            _highlightTask = Scheduler.AddDelayed(highlightCurrent, timeUntilRun: 100);
+            _highlightTask = Scheduler.AddDelayed(highlightCurrent, timeUntilRun: 200);
         }
 
         void highlightCurrent()
