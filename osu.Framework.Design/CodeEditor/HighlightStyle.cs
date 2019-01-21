@@ -1,13 +1,15 @@
+using osuTK.Graphics;
+
 namespace osu.Framework.Design.CodeEditor
 {
     public struct HighlightStyle
     {
-        public readonly HighlightType Type;
+        public readonly Color4 Color;
         public readonly HighlightFont Font;
 
-        public HighlightStyle(HighlightType type, HighlightFont font)
+        public HighlightStyle(Color4 color, HighlightFont font)
         {
-            Type = type;
+            Color = color;
             Font = font;
         }
     }

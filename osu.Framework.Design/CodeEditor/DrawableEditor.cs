@@ -45,7 +45,7 @@ namespace osu.Framework.Design.CodeEditor
         public BindableFloat FontSize { get; } = new BindableFloat(20);
         public BindableInt LineNumberWidth { get; } = new BindableInt(5);
         public Bindable<ISyntaxHighlighter> SyntaxHighlighter { get; } = new Bindable<ISyntaxHighlighter>(new SyntaxHighlighter());
-        public Bindable<EditorColours> Colours { get; } = new Bindable<EditorColours>(EditorColours.Default);
+        public Bindable<HighlightStyleCollection> HighlightStyles { get; } = new Bindable<HighlightStyleCollection>(HighlightStyleCollection.Default);
 
         public BindableList<SelectionRange> Selections { get; } = new BindableList<SelectionRange>();
 
@@ -291,8 +291,8 @@ namespace osu.Framework.Design.CodeEditor
 
                     var range = ranges[rangeIndex];
 
-                    if (Colours.Value.TryGetValue(range.Style.Type, out var color))
-                        word.FadeColour(color, duration: 100);
+                    if (HighlightStyles.Value.TryGetValue(range.Type, out var style))
+                        word.FadeColour(style.Color, duration: 100);
 
                     if (word.EndIndex == range.End)
                         ranges.RemoveAt(rangeIndex);
