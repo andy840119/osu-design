@@ -45,6 +45,8 @@ namespace osu.Framework.Design.CodeEditor
         public int StartIndex { get; private set; }
         public int EndIndex => StartIndex + Length;
 
+        public int Count => _flow.Count;
+
         public void Set(string[] parts, int startIndex)
         {
             // Add new words or set existing ones
@@ -91,5 +93,7 @@ namespace osu.Framework.Design.CodeEditor
             indexInWord = -1;
             return null;
         }
+
+        public DrawableWord this[int index] => _flow[index];
     }
 }
