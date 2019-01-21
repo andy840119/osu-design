@@ -496,15 +496,15 @@ namespace osu.Framework.Design.CodeEditor
             {
                 var before = selection.End.Value;
 
-                selection.End.Value += count;
-
                 if (roundToWord)
                 {
-                    var line = GetLineAtIndex(selection.End, out _, out var indexInLine);
+                    var line = GetLineAtIndex(selection.End + count, out _, out var indexInLine);
                     var word = line.GetWordAtIndex(indexInLine, out _, out _);
 
-                    selection.End.Value = selection.Length >= 0 ? word.EndIndex : word.StartIndex;
+                    selection.End.Value = count > 0 ? word.EndIndex : word.StartIndex;
                 }
+                else
+                    selection.End.Value += count;
 
                 if (!keepSelection)
                     selection.Start.Value = selection.End;
