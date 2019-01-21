@@ -10,6 +10,8 @@ namespace osu.Framework.Design.CodeEditor
     // We simply derive from spritetext because it is already heavily optimized using drawnodes
     public class DrawableWord : SpriteText
     {
+        public int Length => Current.Value.Length;
+
         public DrawableWord()
         {
             FixedWidth = true;
@@ -30,6 +32,7 @@ namespace osu.Framework.Design.CodeEditor
         }
 
         public int StartIndex { get; private set; }
+        public int EndIndex => StartIndex + Length;
 
         public void Set(string value, int startIndex)
         {

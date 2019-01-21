@@ -43,11 +43,12 @@ namespace osu.Framework.Design.CodeEditor
         public float TextStartOffset => _flow.ToSpaceOfOtherDrawable(Vector2.Zero, this).X;
 
         public int StartIndex { get; private set; }
+        public int EndIndex => StartIndex + Length;
 
         public void Set(string[] parts, int startIndex)
         {
             // Add new words or set existing ones
-            var index = 0;
+            var index = startIndex;
 
             for (var i = 0; i < parts.Length; i++)
             {
@@ -67,6 +68,28 @@ namespace osu.Framework.Design.CodeEditor
 
             StartIndex = startIndex;
             Length = parts.Sum(p => p.Length);
+        }
+
+        public DrawableWord GetWordInIndex(int index, out int wordIndex, out int indexInWord)
+        {
+            for (var i = 0; i < _flow.Count; i++)
+            {
+                var word = _flow[i];
+
+                if (index >= word.Length && i != _flow.Count - 1)
+                {
+                    index -= word.Length;
+                    continue;
+                }
+
+                wordIndex = i;
+                indexInWord = index;
+                return word;
+            }
+
+            wordIndex = -1;
+            indexInWord = -1;
+            return null;
         }
     }
 }

@@ -58,18 +58,50 @@ namespace osu.Framework.Design.CodeEditor
             int getIndexAtPosition(MouseEvent e) =>
                 _editor.GetIndexAtPosition(_editor._scroll.ScrollContent.ToLocalSpace(e.ScreenSpaceMousePosition));
 
+            int _clickIndex;
+            bool _doubleClicking;
+
             protected override bool OnMouseDown(MouseDownEvent e)
             {
                 base.OnMouseDown(e);
 
-                _editor.Selections.RemoveAll(s => _editor.Selections.Count != 1);
+                _clickIndex = getIndexAtPosition(e);
 
-                var index = getIndexAtPosition(e);
-                var selection = _editor.Selections[0];
+                var selection = _editor.EnsureOneSelection();
 
-                selection.Start.Value = index;
-                selection.End.Value = index;
+                selection.Start.Value = _clickIndex;
+                selection.End.Value = _clickIndex;
 
+                return true;
+            }
+
+            protected override bool OnMouseUp(MouseUpEvent e)
+            {
+                base.OnMouseUp(e);
+
+                _clickIndex = -1;
+                _doubleClicking = false;
+
+                return true;
+            }
+
+            protected override bool OnClick(ClickEvent e)
+            {
+                base.OnClick(e);
+                return true;
+            }
+
+            protected override bool OnDoubleClick(DoubleClickEvent e)
+            {
+                base.OnDoubleClick(e);
+
+                var selection = _editor.EnsureOneSelection();
+                var word = _editor.GetLineAtIndex(_clickIndex, out _, out var index).GetWordInIndex(index, out _, out index);
+
+                selection.Start.Value = word.StartIndex;
+                selection.End.Value = word.EndIndex;
+
+                _doubleClicking = true;
                 return true;
             }
 
@@ -90,9 +122,26 @@ namespace osu.Framework.Design.CodeEditor
                 base.OnDrag(e);
 
                 var index = getIndexAtPosition(e);
-                var selection = _editor.Selections[0];
+                var selection = _editor.EnsureOneSelection();
 
-                selection.End.Value = index;
+                if (_doubleClicking)
+                {
+                    var currentWord = _editor.GetLineAtIndex(index, out _, out index).GetWordInIndex(index, out _, out index);
+                    var startWord = _editor.GetLineAtIndex(_clickIndex, out _, out var clickIndex).GetWordInIndex(clickIndex, out _, out clickIndex);
+
+                    if (currentWord.StartIndex < startWord.StartIndex)
+                    {
+                        selection.Start.Value = startWord.EndIndex;
+                        selection.End.Value = currentWord.StartIndex;
+                    }
+                    else
+                    {
+                        selection.Start.Value = startWord.StartIndex;
+                        selection.End.Value = currentWord.EndIndex;
+                    }
+                }
+                else
+                    selection.End.Value = index;
 
                 return true;
             }
@@ -132,7 +181,7 @@ namespace osu.Framework.Design.CodeEditor
                 }
             };
 
-            Current.BindValueChanged(updateText, runOnceImmediately: true);
+            Current.BindValueChanged(t => updateText(), runOnceImmediately: true);
 
             FontFamily.BindValueChanged(f => updateFontCache(), runOnceImmediately: true);
             FontSize.BindValueChanged(f => updateFontCache(), runOnceImmediately: true);
@@ -140,7 +189,7 @@ namespace osu.Framework.Design.CodeEditor
             Selections.ItemsAdded += handleSelectionsAdded;
             Selections.ItemsRemoved += handleSelectionsRemoved;
 
-            ScheduleAfterChildren(() => Selections.Add(new SelectionRange(this)));
+            ScheduleAfterChildren(() => EnsureOneSelection());
         }
 
         protected override void LoadComplete()
@@ -167,9 +216,9 @@ namespace osu.Framework.Design.CodeEditor
         static readonly Regex _lineSplitRegex = new Regex(@"\r?(?<=\n)", RegexOptions.Compiled);
         static readonly Regex _wordSplitRegex = new Regex(@"(?<= )(?=\S)", RegexOptions.Compiled);
 
-        void updateText(string text)
+        void updateText()
         {
-            var lines = _lineSplitRegex.Split(text);
+            var lines = _lineSplitRegex.Split(Current);
 
             // Add new lines or set existing ones
             var index = 0;
@@ -204,6 +253,8 @@ namespace osu.Framework.Design.CodeEditor
 
             selection.End.MinValue = 0;
             selection.End.MaxValue = Length;
+
+            _caretDrawables[selection].ResetFlicker();
         }
 
         public void Insert(string value)
@@ -248,6 +299,16 @@ namespace osu.Framework.Design.CodeEditor
                 return;
 
             Current.Value = Current.Value.Remove(index, count);
+        }
+
+        public SelectionRange EnsureOneSelection()
+        {
+            if (Selections.Count == 0)
+                Selections.Add(new SelectionRange(this));
+
+            Selections.RemoveAll(s => Selections.Count != 1);
+
+            return Selections[0];
         }
 
         public float CharWidth { get; private set; }
@@ -330,8 +391,6 @@ namespace osu.Framework.Design.CodeEditor
         {
             foreach (var selection in selections)
             {
-                updateSelectionLimits(selection);
-
                 // Caret drawable
                 _scroll.ScrollContent.Add(_caretDrawables[selection] = new DrawableCaret(selection)
                 {
@@ -343,6 +402,8 @@ namespace osu.Framework.Design.CodeEditor
                 {
                     Depth = _selectionDrawables.Count
                 });
+
+                updateSelectionLimits(selection);
             }
         }
         void handleSelectionsRemoved(IEnumerable<SelectionRange> selections)
