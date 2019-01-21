@@ -57,6 +57,23 @@ namespace osu.Framework.Design.Workspaces
             }
         }
 
+        public DocumentType Type
+        {
+            get
+            {
+                switch (File.Extension.ToLowerInvariant())
+                {
+                    default: return DocumentType.Unknown;
+                    case ".cs": return DocumentType.CSharp;
+                    case ".osuml": return DocumentType.osuML;
+                    case ".xml": return DocumentType.XML;
+                    case ".jpg":
+                    case ".png": return DocumentType.Texture;
+                    case ".mp3": return DocumentType.Audio;
+                }
+            }
+        }
+
         public Document(Workspace workspace, string fullName)
         {
             Workspace = workspace;
