@@ -15,6 +15,7 @@ using osu.Framework.IO.Stores;
 using osu.Framework.Platform;
 using osu.Framework.Threading;
 using osuTK;
+using osuTK.Graphics;
 using osuTK.Input;
 
 namespace osu.Framework.Design.CodeEditor
@@ -293,6 +294,8 @@ namespace osu.Framework.Design.CodeEditor
 
                     if (HighlightStyles.Value.TryGetValue(range.Type, out var style))
                         word.FadeColour(style.Color, duration: 100);
+                    else
+                        word.FadeColour(Color4.White, duration: 100);
 
                     if (word.EndIndex == range.End)
                         ranges.RemoveAt(rangeIndex);
