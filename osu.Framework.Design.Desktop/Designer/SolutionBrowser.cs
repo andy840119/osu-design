@@ -200,7 +200,7 @@ namespace osu.Framework.Design.Designer
                         case ".jpg":
                         case ".png":
                         case ".tiff": tex = "file_type_image"; break;
-                        case ".xoml": tex = "file_type_view"; break;
+                        case ".osuml": tex = "file_type_view"; break;
                         case ".xml": tex = "file_type_xml"; break;
                         default: tex = "default_file"; break;
                     }
