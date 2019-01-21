@@ -226,10 +226,16 @@ namespace osu.Framework.Design.CodeEditor
             }
         }
 
-        static readonly Regex _lineSplitRegex = new Regex(@"\r?(?<=\n)", RegexOptions.Compiled);
+        static readonly Regex _lineSplitRegex = new Regex(@"(?<=\n)", RegexOptions.Compiled);
 
         void updateText()
         {
+            if (Current.Value.Contains('\r'))
+            {
+                Current.Value = Current.Value.Replace("\r", "");
+                return;
+            }
+
             var lines = _lineSplitRegex.Split(Current);
 
             // Add new lines or set existing ones
