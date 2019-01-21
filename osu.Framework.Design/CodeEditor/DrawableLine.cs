@@ -52,14 +52,17 @@ namespace osu.Framework.Design.CodeEditor
             // Add new words or set existing ones
             var index = startIndex;
 
-            for (var i = 0; i < parts.Length; i++)
+            for (int i = 0, j = 0; i < parts.Length; i++)
             {
                 var part = parts[i];
 
-                if (i == _flow.Count)
+                if (string.IsNullOrEmpty(part))
+                    continue;
+
+                if (j == _flow.Count)
                     _flow.Add(new DrawableWord());
 
-                _flow[i].Set(part, index);
+                _flow[j++].Set(part, index);
 
                 index += part.Length;
             }
