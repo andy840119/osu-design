@@ -324,24 +324,23 @@ namespace osu.Framework.Design.CodeEditor
 
         public void Insert(string value)
         {
-            var text = Current.Value;
+            var offset = 0;
 
-            foreach (var selection in Selections)
+            foreach (var selection in Selections.OrderBy(s => s.End.Value))
             {
+                var index = (selection.Length > 0 ? selection.Start : selection.End) + offset;
+                var text = Current.Value;
+
                 if (selection.Length != 0)
-                {
-                    var start = selection.Length > 0 ? selection.Start : selection.End;
-                    var length = selection.Length > 0 ? selection.Length : -selection.Length;
+                    text = text.Remove(index, Math.Abs(selection.Length));
 
-                    text = text.Remove(start, length);
+                text = text.Insert(index, value);
 
-                    selection.End.Value = selection.Start;
-                }
+                Current.Value = text;
+                selection.End.Value = selection.Start.Value = index;
 
-                text = text.Insert(selection.End, value);
+                offset += value.Length;
             }
-
-            Current.Value = text;
         }
         public void Insert(string value, int index)
         {
@@ -353,6 +352,39 @@ namespace osu.Framework.Design.CodeEditor
             Current.Value = Current.Value.Insert(index, value);
         }
 
+        public void Remove(bool retreat = false)
+        {
+            var offset = 0;
+
+            foreach (var selection in Selections.OrderBy(s => s.End.Value))
+            {
+                var index = (selection.Length > 0 ? selection.Start : selection.End) + offset;
+                var text = Current.Value;
+
+                if (selection.Length != 0)
+                {
+                    var length = Math.Abs(selection.Length);
+
+                    text = text.Remove(index, length);
+                    offset -= length;
+                }
+                else if (retreat && index > 0)
+                {
+                    text = text.Remove(--index, 1);
+                    offset -= 1;
+                }
+                else if (!retreat && index < text.Length)
+                {
+                    text = text.Remove(index, 1);
+                    offset -= 1;
+                }
+
+                GetLineAtIndex(index, out _, out selection.IndexInLine);
+
+                Current.Value = text;
+                selection.Start.Value = selection.End.Value = index;
+            }
+        }
         public void Remove(int count, int index)
         {
             if (index >= Length)
@@ -571,10 +603,10 @@ namespace osu.Framework.Design.CodeEditor
                         AdvanceCaretVertical(keepSelection: e.ShiftPressed);
                     break;
                 case Key.BackSpace:
-                    handleDeleteKey(retreat: true);
+                    Remove(retreat: true);
                     break;
                 case Key.Delete:
-                    handleDeleteKey();
+                    Remove();
                     break;
                 case Key.Enter:
                 case Key.KeypadEnter:
@@ -606,20 +638,15 @@ namespace osu.Framework.Design.CodeEditor
         {
             var offset = 0;
 
-            foreach (var selection in Selections)
+            foreach (var selection in Selections.OrderBy(s => s.End.Value))
             {
+                var index = (selection.Length > 0 ? selection.Start : selection.End) + offset;
+                var text = Current.Value;
+
                 if (selection.Length != 0)
-                {
-                    var start = (selection.Length > 0 ? selection.Start : selection.End) + offset;
-                    var length = selection.Length > 0 ? selection.Length : -selection.Length;
+                    text = text.Remove(index, Math.Abs(selection.Length));
 
-                    Current.Value = Current.Value.Remove(start, length);
-
-                    selection.Start.Value = start;
-                    selection.End.Value = start;
-                }
-
-                var indents = Current.Value.CountStart(' ', GetLineAtIndex(selection.End, out _, out _).StartIndex);
+                var indents = Current.Value.CountStart(' ', GetLineAtIndex(index, out _, out _).StartIndex);
                 string newline;
 
                 if (AutoIndent)
@@ -632,45 +659,18 @@ namespace osu.Framework.Design.CodeEditor
                 }
                 else if (advance)
                 {
-                    Current.Value = Current.Value.Insert(selection.End, newline);
-                    AdvanceCaret(newline.Length);
+                    text = text.Insert(selection.End, newline);
+                    index += newline.Length;
                 }
                 else continue;
 
+                GetLineAtIndex(index, out _, out selection.IndexInLine);
+
+                Current.Value = text;
+                selection.Start.Value = selection.End.Value = index;
+
                 offset += newline.Length;
             }
-        }
-
-        void handleDeleteKey(bool retreat = false)
-        {
-            var text = Current.Value;
-
-            foreach (var selection in Selections)
-            {
-                if (selection.Length != 0)
-                {
-                    var start = selection.Length > 0 ? selection.Start : selection.End;
-                    var length = selection.Length > 0 ? selection.Length : -selection.Length;
-
-                    text = text.Remove(start, length);
-
-                    selection.Start.Value = start;
-                    selection.End.Value = start;
-                }
-                else if (retreat && selection.End > 0)
-                {
-                    text = text.Remove(selection.End - 1, 1);
-
-                    selection.End.Value--;
-                    selection.Start.Value = selection.End;
-                }
-                else if (!retreat && selection.End < Length)
-                    text = text.Remove(selection.End, 1);
-
-                GetLineAtIndex(selection.End, out _, out selection.IndexInLine);
-            }
-
-            Current.Value = text;
         }
     }
 }
