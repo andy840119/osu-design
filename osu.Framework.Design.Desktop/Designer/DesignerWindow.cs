@@ -3,6 +3,8 @@ using osu.Framework.Design.CodeEditor;
 using osu.Framework.Design.CodeEditor.Highlighters;
 using osu.Framework.Design.Workspaces;
 using osu.Framework.Graphics;
+using osu.Framework.Graphics.Containers;
+using osu.Framework.Graphics.Shapes;
 
 namespace osu.Framework.Design.Designer
 {
@@ -30,6 +32,22 @@ namespace osu.Framework.Design.Designer
             // Working document for all components of this designer
             _dependencies.Cache(_document = Document.CreateWorkingDocument());
 
+            var editorContainer = new Container
+            {
+                Children = new Drawable[]
+                {
+                    new Box
+                    {
+                        RelativeSizeAxes = Axes.Both,
+                        Colour = DesignerColours.Editor
+                    },
+                    _editor = new DrawableEditor
+                    {
+                        RelativeSizeAxes = Axes.Both
+                    }
+                }
+            };
+
             if (Document.Type == DocumentType.osuML)
             {
                 Child = new HalvedContainer(
@@ -39,7 +57,7 @@ namespace osu.Framework.Design.Designer
                         RelativeSizeAxes = Axes.Y,
                         Height = 0.4f
                     },
-                    _editor = new DrawableEditor()
+                    editorContainer
                 )
                 {
                     RelativeSizeAxes = Axes.Both
@@ -47,10 +65,8 @@ namespace osu.Framework.Design.Designer
             }
             else
             {
-                Child = _editor = new DrawableEditor
-                {
-                    RelativeSizeAxes = Axes.Both
-                };
+                Child = editorContainer;
+                editorContainer.RelativeSizeAxes = Axes.Both;
             }
 
             switch (Document.Type)
