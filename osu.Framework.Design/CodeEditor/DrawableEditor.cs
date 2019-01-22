@@ -20,8 +20,10 @@ using osuTK.Input;
 
 namespace osu.Framework.Design.CodeEditor
 {
-    public class DrawableEditor : CompositeDrawable, IHasCurrentValue<string>
+    public class DrawableEditor : TabbableContainer, IHasCurrentValue<string>
     {
+        public override bool HandleNonPositionalInput => HasFocus;
+
         ScrollContainer _scroll;
         FillFlowContainer<DrawableLine> _flow;
         MouseInputHandler _mouse;
@@ -206,15 +208,6 @@ namespace osu.Framework.Design.CodeEditor
             SyntaxHighlighter.BindValueChanged(h => Scheduler.AddOnce(updateText));
             Current.BindValueChanged(t => Scheduler.AddOnce(updateText));
             Scheduler.AddOnce(updateText);
-
-            ScheduleAfterChildren(() => EnsureOneSelection());
-        }
-
-        protected override void LoadComplete()
-        {
-            base.LoadComplete();
-
-            _textInput.Activate(this);
         }
 
         protected override void Update()
@@ -516,10 +509,6 @@ namespace osu.Framework.Design.CodeEditor
                 _scroll.ScrollContent.Remove(_selectionDrawables[selection]);
                 _selectionDrawables.Remove(selection);
             }
-
-            // Must have at least one selection
-            if (Selections.Count == 0)
-                Selections.Add(new SelectionRange(this));
         }
 
         public bool AdvanceCaret(int count = 1, bool roundToWord = false, bool keepSelection = false)
@@ -672,6 +661,22 @@ namespace osu.Framework.Design.CodeEditor
 
                 offset += newline.Length;
             }
+        }
+
+        public override bool AcceptsFocus => true;
+
+        protected override void OnFocus(FocusEvent e)
+        {
+            _textInput.Activate(this);
+
+            EnsureOneSelection();
+        }
+
+        protected override void OnFocusLost(FocusLostEvent e)
+        {
+            _textInput.Deactivate(this);
+
+            Selections.Clear();
         }
     }
 }
