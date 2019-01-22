@@ -2,15 +2,24 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Launch designer",
+      "name": "Launch designer (Debug)",
       "type": "coreclr",
       "request": "launch",
-      "preLaunchTask": "build",
+      "preLaunchTask": "build debug",
       "program": "${workspaceFolder}/osu.Framework.Design.Desktop/bin/Debug/netcoreapp2.2/osu.Framework.Design.Desktop.dll",
       "cwd": "${workspaceFolder}/osu.Framework.Design.Desktop",
       "args": ["${workspaceFolder}/osu.Framework.Design"],
-      "console": "internalConsole",
-      "internalConsoleOptions": "openOnSessionStart"
+      "console": "internalConsole"
+    },
+    {
+      "name": "Launch designer (Release)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build release",
+      "program": "${workspaceFolder}/osu.Framework.Design.Desktop/bin/Release/netcoreapp2.2/osu.Framework.Design.Desktop.dll",
+      "cwd": "${workspaceFolder}/osu.Framework.Design.Desktop",
+      "args": ["${workspaceFolder}/osu.Framework.Design"],
+      "console": "internalConsole"
     }
   ]
 }

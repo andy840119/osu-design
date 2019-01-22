@@ -2,13 +2,26 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "build",
+      "label": "build debug",
       "command": "dotnet",
       "type": "process",
       "args": [
         "build",
         "${workspaceFolder}/osu.Framework.Design.Desktop/osu.Framework.Design.Desktop.csproj",
         "--no-restore"
+      ],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build release",
+      "command": "dotnet",
+      "type": "process",
+      "args": [
+        "build",
+        "${workspaceFolder}/osu.Framework.Design.Desktop/osu.Framework.Design.Desktop.csproj",
+        "--no-restore",
+        "-c",
+        "Release"
       ],
       "problemMatcher": "$msCompile"
     }
