@@ -36,7 +36,8 @@ namespace osu.Framework.Design.Designer
                     Direction.Vertical,
                     _preview = new PreviewContainer
                     {
-                        Height = 500
+                        RelativeSizeAxes = Axes.Y,
+                        Height = 0.4f
                     },
                     _editor = new DrawableEditor()
                 )
