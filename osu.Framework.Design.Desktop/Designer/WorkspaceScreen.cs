@@ -17,7 +17,8 @@ namespace osu.Framework.Design.Designer
                 Direction.Horizontal,
                 _browser = new SolutionBrowser
                 {
-                    Width = 240,
+                    RelativeSizeAxes = Axes.X,
+                    Width = 0.2f,
                     OpenDocument = d =>
                     {
                         _designerContainer.Clear();
