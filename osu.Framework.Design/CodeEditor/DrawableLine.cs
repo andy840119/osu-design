@@ -49,10 +49,10 @@ namespace osu.Framework.Design.CodeEditor
 
         public void Set(string[] parts, int startIndex)
         {
-            // Add new words or set existing ones
+            var j = 0;
             var index = startIndex;
 
-            for (int i = 0, j = 0; i < parts.Length; i++)
+            for (var i = 0; i < parts.Length; i++)
             {
                 var part = parts[i];
 
@@ -68,8 +68,8 @@ namespace osu.Framework.Design.CodeEditor
             }
 
             // Remove unused words
-            while (_flow.Count > parts.Length)
-                _flow.Remove(_flow[parts.Length]);
+            while (_flow.Count > j)
+                _flow.Remove(_flow[j]);
 
             StartIndex = startIndex;
             Length = parts.Sum(p => p.Length);
