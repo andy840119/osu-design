@@ -7,6 +7,7 @@ using osu.Framework.Design.Markup;
 using osu.Framework.Design.Workspaces;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
+using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
 using osuTK.Graphics;
 
@@ -27,6 +28,11 @@ namespace osu.Framework.Design.Designer
         {
             InternalChildren = new Drawable[]
             {
+                new Box
+                {
+                    RelativeSizeAxes = Axes.Both,
+                    Colour = Color4.Black
+                },
                 _content = new Container
                 {
                     RelativeSizeAxes = Axes.Both,
