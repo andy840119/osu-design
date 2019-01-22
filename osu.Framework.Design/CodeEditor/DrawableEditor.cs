@@ -576,7 +576,9 @@ namespace osu.Framework.Design.CodeEditor
             var manager = _inputManager;
 
             if (manager.FocusedDrawable != this)
+            {
                 manager.ChangeFocus(null);
+            }
         }
 
         protected override bool OnKeyDown(KeyDownEvent e)
@@ -676,17 +678,23 @@ namespace osu.Framework.Design.CodeEditor
 
         public override bool AcceptsFocus => true;
 
+        SelectionRange[] _selectionsBeforeUnfocus = null;
+
         protected override void OnFocus(FocusEvent e)
         {
             _textInput.Activate(this);
 
-            EnsureOneSelection();
+            if (_selectionsBeforeUnfocus == null || _selectionsBeforeUnfocus.Length == 0)
+                EnsureOneSelection();
+            else
+                Selections.AddRange(_selectionsBeforeUnfocus);
         }
 
         protected override void OnFocusLost(FocusLostEvent e)
         {
             _textInput.Deactivate(this);
 
+            _selectionsBeforeUnfocus = Selections.ToArray();
             Selections.Clear();
         }
     }
