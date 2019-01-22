@@ -22,7 +22,7 @@ namespace osu.Framework.Design.Workspaces
                 _fullName.BindTo(value);
             }
         }
-        public string Name => File.FileSystem.Path.GetFileName(_fullName);
+        public string Name => File.Name;
 
         readonly Bindable<bool> _exists = new Bindable<bool>();
         public Bindable<bool> Exists
@@ -132,5 +132,7 @@ namespace osu.Framework.Design.Workspaces
         public TextWriter OpenWriter() => new StreamWriter(OpenWrite());
 
         public WorkingDocument CreateWorkingDocument() => new WorkingDocument(this);
+
+        public override string ToString() => Name;
     }
 }
