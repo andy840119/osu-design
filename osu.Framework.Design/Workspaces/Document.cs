@@ -64,8 +64,11 @@ namespace osu.Framework.Design.Workspaces
                 switch (File.Extension.ToLowerInvariant())
                 {
                     default: return DocumentType.Unknown;
-                    case ".cs": return DocumentType.CSharp;
+                    case ".cs":
+                    case ".csx": return DocumentType.CSharp;
                     case ".osuml": return DocumentType.osuML;
+                    case ".csproj":
+                    case ".vbproj":
                     case ".xml": return DocumentType.XML;
                     case ".jpg":
                     case ".png": return DocumentType.Texture;
