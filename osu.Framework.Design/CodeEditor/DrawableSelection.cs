@@ -34,18 +34,18 @@ namespace osu.Framework.Design.CodeEditor
             _editor = editor;
 
             _fontSize = editor.FontSize.GetBoundCopy() as BindableFloat;
-            _fontSize.BindValueChanged(s => updateDrawables());
+            _fontSize.BindValueChanged(s => Scheduler.AddOnce(updateDrawables));
 
             _lineNumberWidth = editor.LineNumberWidth.GetBoundCopy() as BindableInt;
-            _lineNumberWidth.BindValueChanged(w => updateDrawables());
+            _lineNumberWidth.BindValueChanged(w => Scheduler.AddOnce(updateDrawables));
 
             _selectionStart = _selection.Start.GetBoundCopy() as BindableInt;
-            _selectionStart.BindValueChanged(i => updateDrawables());
+            _selectionStart.BindValueChanged(i => Scheduler.AddOnce(updateDrawables));
 
             _selectionEnd = _selection.End.GetBoundCopy() as BindableInt;
-            _selectionEnd.BindValueChanged(i => updateDrawables());
+            _selectionEnd.BindValueChanged(i => Scheduler.AddOnce(updateDrawables));
 
-            updateDrawables();
+            Scheduler.AddOnce(updateDrawables);
         }
 
         void updateDrawables()

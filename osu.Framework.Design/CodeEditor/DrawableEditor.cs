@@ -196,16 +196,16 @@ namespace osu.Framework.Design.CodeEditor
                 }
             };
 
-            FontFamily.BindValueChanged(f => updateFontCache());
-            FontSize.BindValueChanged(f => updateFontCache());
-            updateFontCache();
+            FontFamily.BindValueChanged(f => Scheduler.AddOnce(updateFontCache));
+            FontSize.BindValueChanged(f => Scheduler.AddOnce(updateFontCache));
+            Scheduler.AddOnce(updateFontCache);
 
             Selections.ItemsAdded += handleSelectionsAdded;
             Selections.ItemsRemoved += handleSelectionsRemoved;
 
-            SyntaxHighlighter.BindValueChanged(h => updateText());
-            Current.BindValueChanged(t => updateText());
-            updateText();
+            SyntaxHighlighter.BindValueChanged(h => Scheduler.AddOnce(updateText));
+            Current.BindValueChanged(t => Scheduler.AddOnce(updateText));
+            Scheduler.AddOnce(updateText);
 
             ScheduleAfterChildren(() => EnsureOneSelection());
         }
