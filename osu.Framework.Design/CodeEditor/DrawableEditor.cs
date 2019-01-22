@@ -280,6 +280,7 @@ namespace osu.Framework.Design.CodeEditor
             selection.End.MaxValue = Length;
 
             _caretDrawables[selection].ResetFlicker();
+            _selectionDrawables[selection].ResetFlicker();
         }
 
         ScheduledDelegate _highlightTask;

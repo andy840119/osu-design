@@ -34,18 +34,31 @@ namespace osu.Framework.Design.CodeEditor
             _editor = editor;
 
             _fontSize = editor.FontSize.GetBoundCopy() as BindableFloat;
-            _fontSize.BindValueChanged(s => Scheduler.AddOnce(updateDrawables));
+            _fontSize.BindValueChanged(s => Scheduler.AddOnce(ResetFlicker));
 
             _lineNumberWidth = editor.LineNumberWidth.GetBoundCopy() as BindableInt;
-            _lineNumberWidth.BindValueChanged(w => Scheduler.AddOnce(updateDrawables));
+            _lineNumberWidth.BindValueChanged(w => Scheduler.AddOnce(ResetFlicker));
 
             _selectionStart = _selection.Start.GetBoundCopy() as BindableInt;
-            _selectionStart.BindValueChanged(i => Scheduler.AddOnce(updateDrawables));
+            _selectionStart.BindValueChanged(i => Scheduler.AddOnce(ResetFlicker));
 
             _selectionEnd = _selection.End.GetBoundCopy() as BindableInt;
-            _selectionEnd.BindValueChanged(i => Scheduler.AddOnce(updateDrawables));
+            _selectionEnd.BindValueChanged(i => Scheduler.AddOnce(ResetFlicker));
 
-            Scheduler.AddOnce(updateDrawables);
+            _selectionEnd.TriggerChange();
+        }
+
+        public void ResetFlicker()
+        {
+            FinishTransforms();
+
+            updateDrawables();
+
+            this.FadeIn(30)
+                .Delay(500)
+                .FadeTo(0.9f, 200)
+                .Delay(300)
+                .Loop();
         }
 
         void updateDrawables()

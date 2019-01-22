@@ -41,17 +41,17 @@ namespace osu.Framework.Design.CodeEditor
             _editor = editor;
 
             _fontSize = editor.FontSize.GetBoundCopy() as BindableFloat;
-            _fontSize.BindValueChanged(s =>
+            _fontSize.BindValueChanged(s => Scheduler.AddOnce(() =>
             {
                 Size = new Vector2(3, s);
                 ResetFlicker();
-            });
+            }));
 
             _lineNumberWidth = editor.LineNumberWidth.GetBoundCopy() as BindableInt;
-            _lineNumberWidth.BindValueChanged(w => ResetFlicker());
+            _lineNumberWidth.BindValueChanged(w => Scheduler.AddOnce(ResetFlicker));
 
             _selectionEnd = _selection.End.GetBoundCopy() as BindableInt;
-            _selectionEnd.BindValueChanged(i => ResetFlicker());
+            _selectionEnd.BindValueChanged(i => Scheduler.AddOnce(ResetFlicker));
 
             // This updates the caret
             _fontSize.TriggerChange();
@@ -59,9 +59,9 @@ namespace osu.Framework.Design.CodeEditor
 
         public void ResetFlicker()
         {
-            Position = _editor.GetPositionAtIndex(_selectionEnd);
-
             FinishTransforms();
+
+            Position = _editor.GetPositionAtIndex(_selectionEnd);
 
             this.FadeIn(30)
                 .Delay(500)
