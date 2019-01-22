@@ -56,10 +56,11 @@ namespace osu.Framework.Design.Designer
             var drawable = _designerDrawables[doc];
 
             foreach (var child in this)
-                child.FadeOut(duration: 200);
+                if (child != drawable)
+                    child.Hide();
 
             drawable.ClearTransforms();
-            drawable.FadeIn(duration: 200);
+            drawable.Show();
         }
     }
 }

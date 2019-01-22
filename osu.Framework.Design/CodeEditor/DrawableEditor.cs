@@ -568,6 +568,17 @@ namespace osu.Framework.Design.CodeEditor
         }
         public bool RetreatCaretVertical(int roundToWord = 1, bool keepSelection = false) => AdvanceCaretVertical(-roundToWord, keepSelection);
 
+        InputManager _inputManager => GetContainingInputManager();
+
+        public void Focus() => _inputManager.ChangeFocus(this);
+        public void Unfocus()
+        {
+            var manager = _inputManager;
+
+            if (manager.FocusedDrawable != this)
+                manager.ChangeFocus(null);
+        }
+
         protected override bool OnKeyDown(KeyDownEvent e)
         {
             base.OnKeyDown(e);

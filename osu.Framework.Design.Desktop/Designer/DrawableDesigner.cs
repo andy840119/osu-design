@@ -83,5 +83,18 @@ namespace osu.Framework.Design.Designer
 
             _editor.Current.BindTo(_document.Content);
         }
+
+        public override void Show()
+        {
+            this.FadeIn(duration: 200);
+
+            Schedule(_editor.Focus);
+        }
+        public override void Hide()
+        {
+            this.FadeOut(duration: 200);
+
+            Schedule(_editor.Unfocus);
+        }
     }
 }
