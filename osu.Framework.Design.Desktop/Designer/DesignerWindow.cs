@@ -27,8 +27,7 @@ namespace osu.Framework.Design.Designer
 
             Head.Child = _tabControl = new DesignerTabControl<Document>
             {
-                RelativeSizeAxes = Axes.X,
-                Height = 30
+                RelativeSizeAxes = Axes.Both
             };
 
             _tabControl.Current.BindValueChanged(handleChange);

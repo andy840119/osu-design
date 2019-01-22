@@ -121,13 +121,8 @@ namespace osu.Framework.Design.UserInterface
                 {
                     _text = new SpriteText
                     {
-                        Margin = new MarginPadding
-                        {
-                            Top = 6,
-                            Bottom = 6
-                        },
-                        Origin = Anchor.BottomLeft,
-                        Anchor = Anchor.BottomLeft,
+                        Origin = Anchor.CentreLeft,
+                        Anchor = Anchor.CentreLeft,
                         Text = value.ToString(),
                         TextSize = 18,
                         Font = "Nunito",

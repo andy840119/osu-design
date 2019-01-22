@@ -41,7 +41,6 @@ namespace osu.Framework.Design.Designer
                         {
                             RelativeSizeAxes = Axes.X,
                             AutoSizeAxes = Axes.Y,
-                            Spacing = new Vector2(4),
                             Direction = FillDirection.Horizontal,
                             Children = new Drawable[]
                             {
@@ -52,7 +51,13 @@ namespace osu.Framework.Design.Designer
                                     Font = "Nunito-Bold",
                                     Colour = DesignerColours.SideForeground,
                                     Shadow = true,
-                                    Padding = new MarginPadding(6),
+                                    Padding = new MarginPadding
+                                    {
+                                        Top = 10,
+                                        Right = 14,
+                                        Bottom = 10,
+                                        Left = 14
+                                    },
                                     Anchor = Anchor.CentreLeft,
                                     Origin = Anchor.CentreLeft
                                 },
