@@ -1,3 +1,4 @@
+using osu.Framework.Allocation;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
@@ -8,17 +9,21 @@ namespace osu.Framework.Design.Designer
 {
     public abstract class ComponentWindow : Container
     {
-        readonly Drawable _headContainer;
-        readonly Container _content;
+        Drawable _headContainer;
+        Container _content;
 
-        protected Container Head { get; }
+        protected Container Head { get; private set; }
 
         protected override Container<Drawable> Content => _content;
 
         public ComponentWindow(string name)
         {
             Name = name;
+        }
 
+        [BackgroundDependencyLoader]
+        void load()
+        {
             InternalChildren = new Drawable[]
             {
                 _headContainer = new Container
@@ -36,28 +41,29 @@ namespace osu.Framework.Design.Designer
                         {
                             RelativeSizeAxes = Axes.X,
                             AutoSizeAxes = Axes.Y,
-                            Padding = new MarginPadding(8),
-                            Spacing = new Vector2(8),
-                            Anchor = Anchor.CentreLeft,
-                            Origin = Anchor.CentreLeft,
+                            Spacing = new Vector2(4),
+                            Direction = FillDirection.Horizontal,
                             Children = new Drawable[]
                             {
                                 new SpriteText
                                 {
-                                    Text = name?.ToUpperInvariant(),
+                                    Text = Name?.ToUpperInvariant(),
                                     TextSize = 18,
                                     Font = "Nunito-Bold",
                                     Colour = DesignerColours.SideForeground,
-                                    Shadow = true
+                                    Shadow = true,
+                                    Padding = new MarginPadding(6),
+                                    Anchor = Anchor.CentreLeft,
+                                    Origin = Anchor.CentreLeft
                                 },
                                 Head = new Container
                                 {
-                                    AutoSizeAxes = Axes.Both
+                                    RelativeSizeAxes = Axes.Both
                                 }
                             }
                         }
                     },
-                    Alpha = string.IsNullOrWhiteSpace(name) ? 0 : 1
+                    Alpha = string.IsNullOrEmpty(Name) ? 0 : 1
                 },
                 _content = new Container
                 {

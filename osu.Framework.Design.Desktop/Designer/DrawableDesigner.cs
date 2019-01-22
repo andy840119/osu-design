@@ -8,14 +8,14 @@ using osu.Framework.Graphics.Shapes;
 
 namespace osu.Framework.Design.Designer
 {
-    public class DesignerWindow : ComponentWindow
+    public class DrawableDesigner : CompositeDrawable
     {
         public readonly Document Document;
 
         PreviewContainer _preview;
         DrawableEditor _editor;
 
-        public DesignerWindow(Document doc) : base("Designer")
+        public DrawableDesigner(Document doc)
         {
             Document = doc;
         }
@@ -50,7 +50,7 @@ namespace osu.Framework.Design.Designer
 
             if (Document.Type == DocumentType.osuML)
             {
-                Child = new HalvedContainer(
+                InternalChild = new HalvedContainer(
                     Direction.Vertical,
                     _preview = new PreviewContainer
                     {
@@ -65,7 +65,7 @@ namespace osu.Framework.Design.Designer
             }
             else
             {
-                Child = editorContainer;
+                InternalChild = editorContainer;
                 editorContainer.RelativeSizeAxes = Axes.Both;
             }
 

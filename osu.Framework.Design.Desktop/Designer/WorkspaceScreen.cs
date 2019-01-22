@@ -8,7 +8,7 @@ namespace osu.Framework.Design.Designer
     public class WorkspaceScreen : Screen
     {
         SolutionBrowser _browser;
-        Container<DesignerWindow> _designerContainer;
+        DesignerWindow _designer;
 
         [BackgroundDependencyLoader]
         void load()
@@ -19,16 +19,9 @@ namespace osu.Framework.Design.Designer
                 {
                     RelativeSizeAxes = Axes.X,
                     Width = 0.2f,
-                    OpenDocument = d =>
-                    {
-                        _designerContainer.Clear();
-                        _designerContainer.Add(new DesignerWindow(d)
-                        {
-                            RelativeSizeAxes = Axes.Both
-                        });
-                    }
+                    OpenDocument = d => _designer.SelectDocument(d)
                 },
-                _designerContainer = new Container<DesignerWindow>()
+                _designer = new DesignerWindow()
             )
             {
                 RelativeSizeAxes = Axes.Both
