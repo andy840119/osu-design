@@ -473,7 +473,7 @@ namespace osu.Framework.Design.CodeEditor
             return null;
         }
 
-        public DrawableLine this[int index] => _flow[index];
+        public new DrawableLine this[int index] => _flow[index];
 
         readonly Dictionary<SelectionRange, DrawableCaret> _caretDrawables = new Dictionary<SelectionRange, DrawableCaret>();
         readonly Dictionary<SelectionRange, DrawableSelection> _selectionDrawables = new Dictionary<SelectionRange, DrawableSelection>();
