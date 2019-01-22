@@ -1,5 +1,6 @@
 using System;
-using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using osu.Framework.Allocation;
 using osu.Framework.Configuration;
 using osu.Framework.Design.Markup;
@@ -7,7 +8,6 @@ using osu.Framework.Design.Workspaces;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Sprites;
-using osu.Framework.Threading;
 using osuTK.Graphics;
 
 namespace osu.Framework.Design.Designer
@@ -56,10 +56,12 @@ namespace osu.Framework.Design.Designer
             _documentContent.BindValueChanged(handleChange, true);
         }
 
-        ScheduledDelegate _updateTask;
         Bindable<Exception> _error;
 
-        public double UpdateDebounceMilliseconds { get; set; } = 600;
+        Task _updateTask;
+        CancellationTokenSource _updateSource;
+
+        public double UpdateDebounceTime { get; set; } = 500;
 
         void handleChange(string content)
         {
@@ -74,37 +76,52 @@ namespace osu.Framework.Design.Designer
 
             _content.FadeTo(0.6f, 200);
 
-            _updateTask?.Cancel();
-            _updateTask = Scheduler.AddDelayed(
-                task: () =>
+            // Cancel last update
+            if (_updateTask != null)
+            {
+                _updateSource.Cancel();
+                _updateSource.Dispose();
+            }
+
+            _updateSource = new CancellationTokenSource();
+            _updateTask = Task.Run(updateAsync, _updateSource.Token);
+        }
+
+        async Task updateAsync()
+        {
+            await Task.Delay(TimeSpan.FromMilliseconds(UpdateDebounceTime));
+
+            try
+            {
+                // Read and parse markup
+                var node = new DrawableNode();
+                node.Load(_documentContent);
+
+                // Create drawable from markup
+                var drawable = node.CreateDrawable();
+
+                Schedule(() =>
                 {
-                    try
-                    {
-                        // Read and parse markup
-                        var node = new DrawableNode();
-                        node.Load(content);
+                    _content.Child = drawable;
+                    _content.FadeIn(30);
 
-                        // Create drawable from markup
-                        Child = node.CreateDrawable();
+                    _statusText.Text = "Waiting...";
+                    _statusText.FadeColour(Color4.White, 200);
 
-                        _content.FadeIn(30);
+                    _errorDisplay.FadeOut(200);
+                });
+            }
+            catch (Exception e)
+            {
+                Schedule(() =>
+                {
+                    _statusText.Text = "Error!";
+                    _statusText.FadeColour(DesignerColours.Error, 200);
 
-                        _statusText.Text = "Waiting...";
-                        _statusText.FadeColour(Color4.White, 200);
-
-                        _errorDisplay.FadeOut(30);
-                    }
-                    catch (Exception e)
-                    {
-                        _statusText.Text = "Error!";
-                        _statusText.FadeColour(DesignerColours.Error, 30);
-
-                        _error.Value = e;
-                        _errorDisplay.FadeIn(200);
-                    }
-                },
-                timeUntilRun: UpdateDebounceMilliseconds
-            );
+                    _error.Value = e;
+                    _errorDisplay.FadeIn(200);
+                });
+            }
         }
     }
 }
