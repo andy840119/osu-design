@@ -74,7 +74,7 @@ namespace osu.Framework.Design.Designer
             _statusText.Text = "Parsing...";
             _statusText.FadeColour(DesignerColours.Highlight, 200);
 
-            _content.FadeTo(0.6f, 200);
+            _content.FadeTo(0.8f, 200);
 
             // Cancel last update
             if (_updateTask != null)
@@ -103,7 +103,7 @@ namespace osu.Framework.Design.Designer
                 Schedule(() =>
                 {
                     _content.Child = drawable;
-                    _content.FadeIn(30);
+                    _content.FadeIn(200);
 
                     _statusText.Text = "Waiting...";
                     _statusText.FadeColour(Color4.White, 200);
