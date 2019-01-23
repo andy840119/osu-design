@@ -397,9 +397,11 @@ namespace osu.Framework.Design.CodeEditor
             if (Selections.Count == 0)
                 Selections.Add(new SelectionRange(this));
 
-            Selections.RemoveAll(s => Selections.Count != 1);
+            var selection = Selections[0];
 
-            return Selections[0];
+            Selections.RemoveAll(s => s != selection);
+
+            return selection;
         }
 
         public float CharWidth { get; private set; }
