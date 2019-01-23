@@ -3,6 +3,8 @@ using osu.Framework.Allocation;
 using osu.Framework.Design.Workspaces;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Shapes;
+using osu.Framework.Input.Events;
+using osuTK.Input;
 
 namespace osu.Framework.Design.Designer
 {
@@ -40,6 +42,7 @@ namespace osu.Framework.Design.Designer
 
             if (_designerDrawables.TryGetValue(doc, out var drawable))
                 workingDoc = drawable.WorkingDocument;
+
             else
             {
                 workingDoc = doc.CreateWorkingDocument();
@@ -55,6 +58,20 @@ namespace osu.Framework.Design.Designer
             _tabControl.Current.Value = workingDoc;
         }
 
+        public void CloseDocument(WorkingDocument workingDoc)
+        {
+            if (!_designerDrawables.TryGetValue(workingDoc.Document, out var drawable))
+                throw new KeyNotFoundException($"Document '{workingDoc}' is not open.");
+
+            _tabControl.RemoveItem(workingDoc);
+
+            drawable
+                .FadeOut(duration: 200)
+                .Expire();
+
+            _designerDrawables.Remove(workingDoc.Document);
+        }
+
         void handleChange(WorkingDocument workingDoc)
         {
             var drawable = _designerDrawables[workingDoc.Document];
@@ -65,6 +82,26 @@ namespace osu.Framework.Design.Designer
 
             drawable.ClearTransforms();
             drawable.Show();
+        }
+
+        protected override bool OnKeyDown(KeyDownEvent e)
+        {
+            base.OnKeyDown(e);
+
+            switch (e.Key)
+            {
+                case Key.W:
+                    if (e.ControlPressed && _tabControl.Current.Value != null)
+                    {
+                        CloseDocument(_tabControl.Current);
+                        break;
+                    }
+                    return false;
+                default:
+                    return false;
+            }
+
+            return true;
         }
     }
 }
