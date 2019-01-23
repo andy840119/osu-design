@@ -693,7 +693,8 @@ namespace osu.Framework.Design.CodeEditor
 
             if (_selectionsBeforeUnfocus == null || _selectionsBeforeUnfocus.Length == 0)
                 GetSingleSelection();
-            else
+
+            else if (Selections.Count == 0)
                 Selections.AddRange(_selectionsBeforeUnfocus);
         }
 
