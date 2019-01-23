@@ -102,14 +102,7 @@ namespace osu.Framework.Design.Markup
             {
                 var child = new DrawableNode();
 
-                try
-                {
-                    child.Load(childElement);
-                }
-                catch (Exception e)
-                {
-                    throw new MarkupException($"Could not parse child '{childElement.Name.LocalName}' of Drawable '{DrawableType}' [{GivenName}].", e);
-                }
+                child.Load(childElement);
 
                 Add(child);
             }
