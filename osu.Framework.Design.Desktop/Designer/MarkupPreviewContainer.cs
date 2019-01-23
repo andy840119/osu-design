@@ -43,7 +43,7 @@ namespace osu.Framework.Design.Designer
                 _errorDisplay = new ParserErrorDisplay
                 {
                     RelativeSizeAxes = Axes.Both,
-                    Height = 0.5f,
+                    Height = 0.8f,
                     Anchor = Anchor.BottomLeft,
                     Origin = Anchor.BottomLeft
                 },
