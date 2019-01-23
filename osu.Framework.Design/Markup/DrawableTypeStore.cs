@@ -22,10 +22,7 @@ namespace osu.Framework.Design.Markup
                         .Load(import.AssemblyName)
                         .GetExportedTypes()
                         .Where(t => t.IsClass &&
-                                    !t.IsAbstract &&
-                                    t.IsSubclassOf(typeof(Drawable)) &&
-                                    t.GetConstructors().Any(c =>
-                                        c.GetParameters().All(p => p.IsOptional)))
+                                    t.IsSubclassOf(typeof(Drawable)))
                         .ToArray();
 
                 var pattern = Glob.Parse(import.ImportPattern);
@@ -35,7 +32,19 @@ namespace osu.Framework.Design.Markup
                     .ToArray();
 
                 if (matchingTypes.Length == 1)
-                    return matchingTypes[0];
+                {
+                    var matchingType = matchingTypes[0];
+
+                    // Ensure type is not abstract
+                    if (matchingType.IsAbstract)
+                        throw new MarkupException($"Drawable '{matchingType}' is abstract and cannot be used.");
+
+                    // Ensure type can be created
+                    if (!matchingType.GetConstructors().Any(c => c.GetParameters().All(p => p.IsOptional)))
+                        throw new MarkupException($"Drawable '{matchingType}' does not have a suitable constructor.");
+
+                    return matchingType;
+                }
 
                 if (matchingTypes.Length == 0)
                     throw new KeyNotFoundException($"Type '{localName}' could not be found in assembly '{import.AssemblyName}'.");
