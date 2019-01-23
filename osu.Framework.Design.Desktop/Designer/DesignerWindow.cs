@@ -9,7 +9,7 @@ namespace osu.Framework.Design.Designer
 {
     public class DesignerWindow : ComponentWindow
     {
-        DesignerTabControl<Document> _tabControl;
+        DesignerTabControl<WorkingDocument> _tabControl;
 
         public DesignerWindow() : base("Designer")
         {
@@ -25,7 +25,7 @@ namespace osu.Framework.Design.Designer
                 Depth = float.MaxValue
             });
 
-            Head.Child = _tabControl = new DesignerTabControl<Document>
+            Head.Child = _tabControl = new DesignerTabControl<WorkingDocument>
             {
                 RelativeSizeAxes = Axes.Both
             };
@@ -37,22 +37,28 @@ namespace osu.Framework.Design.Designer
 
         public void SelectDocument(Document doc)
         {
-            if (!_designerDrawables.ContainsKey(doc))
+            WorkingDocument workingDoc;
+
+            if (_designerDrawables.TryGetValue(doc, out var drawable))
+                workingDoc = drawable.WorkingDocument;
+            else
             {
-                Add(_designerDrawables[doc] = new DrawableDesigner(doc)
+                workingDoc = doc.CreateWorkingDocument();
+
+                Add(_designerDrawables[doc] = new DrawableDesigner(workingDoc)
                 {
                     RelativeSizeAxes = Axes.Both
                 });
 
-                _tabControl.AddItem(doc);
+                _tabControl.AddItem(workingDoc);
             }
 
-            _tabControl.Current.Value = doc;
+            _tabControl.Current.Value = workingDoc;
         }
 
-        void handleChange(Document doc)
+        void handleChange(WorkingDocument workingDoc)
         {
-            var drawable = _designerDrawables[doc];
+            var drawable = _designerDrawables[workingDoc.Document];
 
             foreach (var child in this)
                 if (child != drawable)

@@ -10,27 +10,25 @@ namespace osu.Framework.Design.Designer
 {
     public class DrawableDesigner : CompositeDrawable
     {
-        public readonly Document Document;
+        public readonly WorkingDocument WorkingDocument;
 
         PreviewContainer _preview;
         DrawableEditor _editor;
 
-        public DrawableDesigner(Document doc)
+        public DrawableDesigner(WorkingDocument doc)
         {
-            Document = doc;
+            WorkingDocument = doc;
         }
 
         DependencyContainer _dependencies;
         protected override IReadOnlyDependencyContainer CreateChildDependencies(IReadOnlyDependencyContainer parent) =>
             _dependencies = new DependencyContainer(base.CreateChildDependencies(parent));
 
-        WorkingDocument _document;
-
         [BackgroundDependencyLoader]
         void load()
         {
             // Working document for all components of this designer
-            _dependencies.Cache(_document = Document.CreateWorkingDocument());
+            _dependencies.Cache(WorkingDocument);
 
             var editorContainer = new Container
             {
@@ -48,7 +46,7 @@ namespace osu.Framework.Design.Designer
                 }
             };
 
-            if (Document.Type == DocumentType.osuML)
+            if (WorkingDocument.Document.Type == DocumentType.osuML)
             {
                 InternalChild = new HalvedContainer(
                     Direction.Vertical,
@@ -69,7 +67,7 @@ namespace osu.Framework.Design.Designer
                 editorContainer.RelativeSizeAxes = Axes.Both;
             }
 
-            switch (Document.Type)
+            switch (WorkingDocument.Document.Type)
             {
                 case DocumentType.CSharp:
                     _editor.SyntaxHighlighter.Value = new CSharpSyntaxHighlighter();
@@ -81,7 +79,7 @@ namespace osu.Framework.Design.Designer
                     break;
             }
 
-            _editor.Current.BindTo(_document.Content);
+            _editor.Current.BindTo(WorkingDocument.Content);
         }
 
         public override void Show()
