@@ -18,5 +18,5 @@
         Text="My SpriteText is awesome"
         Font="Nunito-BoldItalic"
         TextSize="20"
-        Margin="10,10,10,10"/>
+        Margin="10,20,20,20"/>
 </Container>
