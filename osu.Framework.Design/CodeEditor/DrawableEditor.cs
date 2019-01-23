@@ -326,7 +326,12 @@ namespace osu.Framework.Design.CodeEditor
                 var text = Current.Value;
 
                 if (selection.Length != 0)
-                    text = text.Remove(index, Math.Abs(selection.Length));
+                {
+                    var length = Math.Abs(selection.Length);
+
+                    text = text.Remove(index, length);
+                    offset -= length;
+                }
 
                 text = text.Insert(index, value);
 
