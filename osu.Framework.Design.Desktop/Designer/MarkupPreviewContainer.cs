@@ -35,8 +35,10 @@ namespace osu.Framework.Design.Designer
                 },
                 _content = new Container
                 {
-                    RelativeSizeAxes = Axes.Both,
-                    Masking = true
+                    AutoSizeAxes = Axes.Both,
+                    Masking = true,
+                    Anchor = Anchor.Centre,
+                    Origin = Anchor.Centre
                 },
                 _errorDisplay = new ParserErrorDisplay
                 {
