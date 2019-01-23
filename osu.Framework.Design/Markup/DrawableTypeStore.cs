@@ -23,7 +23,9 @@ namespace osu.Framework.Design.Markup
                         .GetExportedTypes()
                         .Where(t => t.IsClass &&
                                     !t.IsAbstract &&
-                                    t.IsSubclassOf(typeof(Drawable)))
+                                    t.IsSubclassOf(typeof(Drawable)) &&
+                                    t.GetConstructors().Any(c =>
+                                        c.GetParameters().All(p => p.IsOptional)))
                         .ToArray();
 
                 var pattern = Glob.Parse(import.ImportPattern);
