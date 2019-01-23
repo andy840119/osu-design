@@ -80,7 +80,7 @@ namespace osu.Framework.Design.CodeEditor
 
                 _clickIndex = getIndexAtPosition(e);
 
-                var selection = _editor.EnsureOneSelection();
+                var selection = _editor.GetSingleSelection();
 
                 selection.Start.Value = _clickIndex;
                 selection.End.Value = _clickIndex;
@@ -109,7 +109,7 @@ namespace osu.Framework.Design.CodeEditor
             {
                 base.OnDoubleClick(e);
 
-                var selection = _editor.EnsureOneSelection();
+                var selection = _editor.GetSingleSelection();
                 var word = _editor.GetLineAtIndex(_clickIndex, out _, out var index).GetWordAtIndex(index, out _, out index);
 
                 selection.Start.Value = word.StartIndex;
@@ -137,7 +137,7 @@ namespace osu.Framework.Design.CodeEditor
                 base.OnDrag(e);
 
                 var index = getIndexAtPosition(e);
-                var selection = _editor.EnsureOneSelection();
+                var selection = _editor.GetSingleSelection();
 
                 if (_doubleClicking)
                 {
@@ -392,7 +392,7 @@ namespace osu.Framework.Design.CodeEditor
             Current.Value = Current.Value.Remove(index, count);
         }
 
-        public SelectionRange EnsureOneSelection()
+        public SelectionRange GetSingleSelection()
         {
             if (Selections.Count == 0)
                 Selections.Add(new SelectionRange(this));
@@ -687,7 +687,7 @@ namespace osu.Framework.Design.CodeEditor
             _textInput.Activate(this);
 
             if (_selectionsBeforeUnfocus == null || _selectionsBeforeUnfocus.Length == 0)
-                EnsureOneSelection();
+                GetSingleSelection();
             else
                 Selections.AddRange(_selectionsBeforeUnfocus);
         }
