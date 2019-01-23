@@ -61,21 +61,34 @@ namespace osu.Framework.Design.Designer
             if (e == null)
                 return;
 
-            _flow.AddText($"{e.Message}\n", t =>
+            addException(e);
+        }
+
+        void addException(Exception e)
+        {
+            _flow.AddParagraph(e.Message, t =>
             {
                 t.Colour = DesignerColours.Error;
                 t.TextSize = 24;
                 t.Font = "Nunito-Bold";
             });
-            _flow.AddText($"{e.Source}\n", t =>
+            _flow.AddParagraph(e.Source, t =>
             {
                 t.Colour = DesignerColours.Highlight;
             });
-            _flow.AddText($"Trace:\n{e.StackTrace}", t =>
+            _flow.AddParagraph(e.StackTrace, t =>
             {
-                t.Alpha = 0.7f;
+                t.Alpha = 0.6f;
+                t.TextSize = 18;
                 t.Font = "Inconsolata";
             });
+
+            if (e.InnerException != null)
+            {
+                _flow.AddParagraph("");
+
+                addException(e.InnerException);
+            }
         }
     }
 }
