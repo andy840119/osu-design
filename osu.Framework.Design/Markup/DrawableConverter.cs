@@ -22,7 +22,14 @@ namespace osu.Framework.Design.Markup
 
             // Apply properties
             foreach (var property in node.Properties.OfType<EmbeddedDrawableProperty>())
-                property.PropertyInfo.SetValue(drawable, property.ParsedValue);
+                try
+                {
+                    property.PropertyInfo.SetValue(drawable, property.ParsedValue);
+                }
+                catch (Exception e)
+                {
+                    throw new MarkupException($"Could not parse value '{property.RawValue}' for property '{property.Name}' of Drawable '{node.DrawableType}' [{node.GivenName}].", e);
+                }
 
             // Recursively create children
             if (drawable is IContainerCollection<Drawable> container)
