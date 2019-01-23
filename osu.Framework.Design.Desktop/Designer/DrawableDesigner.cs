@@ -105,8 +105,11 @@ namespace osu.Framework.Design.Designer
             {
                 case Key.S:
                     if (e.ControlPressed)
+                    {
                         WorkingDocument.Save();
-                    break;
+                        break;
+                    }
+                    return false;
                 default:
                     return false;
             }
