@@ -5,6 +5,8 @@ using osu.Framework.Design.Workspaces;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
+using osu.Framework.Input.Events;
+using osuTK.Input;
 
 namespace osu.Framework.Design.Designer
 {
@@ -93,6 +95,23 @@ namespace osu.Framework.Design.Designer
             this.FadeOut(duration: 200);
 
             Schedule(_editor.Unfocus);
+        }
+
+        protected override bool OnKeyDown(KeyDownEvent e)
+        {
+            base.OnKeyDown(e);
+
+            switch (e.Key)
+            {
+                case Key.S:
+                    if (e.ControlPressed)
+                        WorkingDocument.Save();
+                    break;
+                default:
+                    return false;
+            }
+
+            return true;
         }
     }
 }
