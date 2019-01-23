@@ -46,7 +46,7 @@ namespace osu.Framework.Design.Designer
                 return;
             }
 
-            var editorContainer = new Container
+            Drawable editorContainer = new Container
             {
                 Children = new Drawable[]
                 {
@@ -65,7 +65,7 @@ namespace osu.Framework.Design.Designer
             switch (WorkingDocument.Document.Type)
             {
                 case DocumentType.osuML:
-                    InternalChild = new HalvedContainer(
+                    editorContainer = new HalvedContainer(
                         Direction.Vertical,
                         _preview = new PreviewContainer
                         {
@@ -73,29 +73,22 @@ namespace osu.Framework.Design.Designer
                             Height = 0.4f
                         },
                         editorContainer
-                    )
-                    {
-                        RelativeSizeAxes = Axes.Both
-                    };
+                    );
+
+                    _editor.SyntaxHighlighter.Value = new XMLSyntaxHighlighter();
                     break;
 
-                default:
-                    InternalChild = editorContainer;
-                    editorContainer.RelativeSizeAxes = Axes.Both;
-                    break;
-            }
-
-            switch (WorkingDocument.Document.Type)
-            {
-                case DocumentType.CSharp:
-                    _editor.SyntaxHighlighter.Value = new CSharpSyntaxHighlighter();
-                    break;
-
-                case DocumentType.osuML:
                 case DocumentType.XML:
                     _editor.SyntaxHighlighter.Value = new XMLSyntaxHighlighter();
                     break;
+
+                case DocumentType.CSharp:
+                    _editor.SyntaxHighlighter.Value = new CSharpSyntaxHighlighter();
+                    break;
             }
+
+            editorContainer.RelativeSizeAxes = Axes.Both;
+            InternalChild = editorContainer;
 
             _editor.Current.BindTo(WorkingDocument.Content);
         }
