@@ -58,5 +58,7 @@ namespace osu.Framework.Design.Workspaces
             _content.UnbindAll();
             _lastWriteTime.UnbindAll();
         }
+
+        public override string ToString() => Document.ToString();
     }
 }
