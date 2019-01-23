@@ -1,13 +1,13 @@
 <Container
     xmlns="osufx://osu.Framework/*"
-    RelativeSizeAxes="Both">
+    Size="400,300">
     <Box
-        Name="MyBox"
+        Name="Background"
         RelativeSizeAxes="Both"
         Colour="rgba(250,150,100,200)"/>
     <Container
         Name="MyContainer"
-        Padding="100,100,100,100"
+        Padding="60,40,60,40"
         RelativeSizeAxes="Both">
         <Box
             RelativeSizeAxes="Both"
