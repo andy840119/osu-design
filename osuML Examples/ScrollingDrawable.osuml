@@ -1,0 +1,28 @@
+<Container
+    xmlns="osufx://osu.Framework/*"
+    Size="400,200">
+    <Box
+        RelativeSizeAxes="Both"
+        Colour="#1a1a1a"/>
+    <ScrollContainer
+        Name="MyScroll"
+        RelativeSizeAxes="Both">
+        <FillFlowContainer
+            RelativeSizeAxes="X"
+            AutoSizeAxes="Y"
+            Spacing="0,10"
+            Padding="10,10,10,10">
+            <TextBox
+                RelativeSizeAxes="X"
+                Height="30"
+                Text="My textbox content"/>
+            <TextBox
+                RelativeSizeAxes="X"
+                Height="40"
+                Text="Second textbox"/>
+            <SpriteText
+                Text="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus sed felis leo. Donec magna risus, eleifend sed rutrum quis, dictum ut enim. Aenean auctor rutrum neque, id laoreet nisi rhoncus ac. Donec vehicula risus vel quam pharetra dapibus. Vestibulum vehicula dui eu lacus pulvinar efficitur. Quisque mollis eu erat id suscipit. Fusce placerat nibh in posuere aliquam. Donec et dui ipsum. Curabitur ante est, lacinia id fermentum eu, viverra eget ligula."
+                RelativeSizeAxes="X"/>
+        </FillFlowContainer>
+    </ScrollContainer>
+</Container>
