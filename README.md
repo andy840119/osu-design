@@ -71,6 +71,7 @@ Breaking down the above markup:
     <Box
         RelativeSizeAxes="Both"
         Colour="#00ff00, #ff00ff, #00ffff, #ff0000"/>
+</Container>
 ```
 
 - The root node has a child element `Container` named `MyContainer`, relatively sized in both axes.
