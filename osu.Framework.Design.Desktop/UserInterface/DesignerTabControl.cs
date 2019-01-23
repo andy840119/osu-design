@@ -1,4 +1,5 @@
 using osu.Framework.Graphics;
+using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.Sprites;
 using osu.Framework.Graphics.UserInterface;
@@ -96,8 +97,11 @@ namespace osu.Framework.Design.UserInterface
 
         public class DesignerTabItem : TabItem<T>
         {
+            readonly FillFlowContainer _content;
             readonly SpriteText _text;
             readonly Box _bar;
+
+            protected override Container<Drawable> Content => _content;
 
             protected override bool OnHover(HoverEvent e)
             {
@@ -117,15 +121,21 @@ namespace osu.Framework.Design.UserInterface
                 AutoSizeAxes = Axes.X;
                 RelativeSizeAxes = Axes.Y;
 
-                Children = new Drawable[]
+                InternalChildren = new Drawable[]
                 {
-                    _text = new SpriteText
+                    _content = new FillFlowContainer
                     {
-                        Origin = Anchor.CentreLeft,
-                        Anchor = Anchor.CentreLeft,
-                        Text = value.ToString(),
-                        TextSize = 18,
-                        Font = "Nunito",
+                        AutoSizeAxes = Axes.X,
+                        RelativeSizeAxes = Axes.Y,
+                        Direction = FillDirection.Horizontal,
+                        Child = _text = new SpriteText
+                        {
+                            Origin = Anchor.CentreLeft,
+                            Anchor = Anchor.CentreLeft,
+                            Text = value.ToString(),
+                            TextSize = 18,
+                            Font = "Nunito"
+                        }
                     },
                     _bar = new Box
                     {
