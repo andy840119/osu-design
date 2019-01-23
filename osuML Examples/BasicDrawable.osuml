@@ -1,5 +1,6 @@
 <Container
     xmlns="osufx://osu.Framework/*"
+    Name="BasicDrawable"
     Size="400,300">
     <Box
         Name="Background"

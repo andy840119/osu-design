@@ -1,5 +1,6 @@
 <Container
     xmlns="osufx://osu.Framework/*"
+    Name="ScrollingDrawable"
     Size="400,200">
     <Box
         RelativeSizeAxes="Both"
