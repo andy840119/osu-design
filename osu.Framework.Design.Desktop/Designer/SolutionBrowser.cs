@@ -50,7 +50,7 @@ namespace osu.Framework.Design.Designer
                         RelativeSizeAxes = Axes.X,
                         AutoSizeAxes = Axes.Y,
                         Direction = FillDirection.Vertical,
-                        Padding = new MarginPadding(5)
+                        Padding = new MarginPadding(2)
                     }
                 }
             };
@@ -241,13 +241,13 @@ namespace osu.Framework.Design.Designer
                                             _highlight = new Box
                                             {
                                                 RelativeSizeAxes = Axes.Both,
-                                                Colour = DesignerColours.Highlight.Opacity(0.4f),
+                                                Colour = DesignerColours.Highlight.Opacity(0.5f),
                                                 Alpha = 0
                                             },
                                             _hover = new Box
                                             {
                                                 RelativeSizeAxes = Axes.Both,
-                                                Colour = Color4.White.Opacity(0.04f),
+                                                Colour = Color4.White.Opacity(0.05f),
                                                 Alpha = 0
                                             }
                                         }
@@ -257,7 +257,7 @@ namespace osu.Framework.Design.Designer
                                         RelativeSizeAxes = Axes.X,
                                         AutoSizeAxes = Axes.Y,
                                         Direction = FillDirection.Horizontal,
-                                        Padding = new MarginPadding(4),
+                                        Padding = new MarginPadding(3),
                                         Spacing = new Vector2(5, 0),
                                         Children = new Drawable[]
                                         {
@@ -285,7 +285,7 @@ namespace osu.Framework.Design.Designer
                                 Direction = FillDirection.Vertical,
                                 Padding = new MarginPadding
                                 {
-                                    Left = 18
+                                    Left = 14
                                 },
                                 Alpha = 0
                             }
