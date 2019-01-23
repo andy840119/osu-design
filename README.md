@@ -1,6 +1,6 @@
 # osu!design
 
-Design-time UI designer for [osu!framework](https://github.com/ppy/osu-framework) based on a markup language.
+Design-time UI creator for [osu!framework](https://github.com/ppy/osu-framework) based on a markup language.
 
 ## Requirements
 
