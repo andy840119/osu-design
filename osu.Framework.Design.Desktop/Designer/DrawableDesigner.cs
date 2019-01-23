@@ -5,6 +5,7 @@ using osu.Framework.Design.Workspaces;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Containers;
 using osu.Framework.Graphics.Shapes;
+using osu.Framework.Graphics.Sprites;
 using osu.Framework.Input.Events;
 using osuTK.Input;
 
@@ -32,6 +33,19 @@ namespace osu.Framework.Design.Designer
             // Working document for all components of this designer
             _dependencies.Cache(WorkingDocument);
 
+            if (WorkingDocument.Document.Type == DocumentType.Unknown)
+            {
+                InternalChild = new SpriteText
+                {
+                    Anchor = Anchor.Centre,
+                    Origin = Anchor.Centre,
+                    Text = $"osu!design does not support editing of file type '{WorkingDocument.Document.File.Extension}'.",
+                    TextSize = 18,
+                    Font = "Inconsolata"
+                };
+                return;
+            }
+
             var editorContainer = new Container
             {
                 Children = new Drawable[]
@@ -48,25 +62,27 @@ namespace osu.Framework.Design.Designer
                 }
             };
 
-            if (WorkingDocument.Document.Type == DocumentType.osuML)
+            switch (WorkingDocument.Document.Type)
             {
-                InternalChild = new HalvedContainer(
-                    Direction.Vertical,
-                    _preview = new PreviewContainer
+                case DocumentType.osuML:
+                    InternalChild = new HalvedContainer(
+                        Direction.Vertical,
+                        _preview = new PreviewContainer
+                        {
+                            RelativeSizeAxes = Axes.Y,
+                            Height = 0.4f
+                        },
+                        editorContainer
+                    )
                     {
-                        RelativeSizeAxes = Axes.Y,
-                        Height = 0.4f
-                    },
-                    editorContainer
-                )
-                {
-                    RelativeSizeAxes = Axes.Both
-                };
-            }
-            else
-            {
-                InternalChild = editorContainer;
-                editorContainer.RelativeSizeAxes = Axes.Both;
+                        RelativeSizeAxes = Axes.Both
+                    };
+                    break;
+
+                default:
+                    InternalChild = editorContainer;
+                    editorContainer.RelativeSizeAxes = Axes.Both;
+                    break;
             }
 
             switch (WorkingDocument.Document.Type)
@@ -88,18 +104,23 @@ namespace osu.Framework.Design.Designer
         {
             this.FadeIn(duration: 200);
 
-            Schedule(_editor.Focus);
+            if (_editor != null)
+                Schedule(_editor.Focus);
         }
         public override void Hide()
         {
             this.FadeOut(duration: 200);
 
-            Schedule(_editor.Unfocus);
+            if (_editor != null)
+                Schedule(_editor.Unfocus);
         }
 
         protected override bool OnKeyDown(KeyDownEvent e)
         {
             base.OnKeyDown(e);
+
+            if (_editor == null)
+                return false;
 
             switch (e.Key)
             {
