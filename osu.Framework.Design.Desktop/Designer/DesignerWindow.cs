@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using osu.Framework.Allocation;
-using osu.Framework.Design.UserInterface;
 using osu.Framework.Design.Workspaces;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Shapes;
@@ -9,7 +8,7 @@ namespace osu.Framework.Design.Designer
 {
     public class DesignerWindow : ComponentWindow
     {
-        DesignerTabControl<WorkingDocument> _tabControl;
+        DocumentTabControl _tabControl;
 
         public DesignerWindow() : base("Designer")
         {
@@ -25,7 +24,7 @@ namespace osu.Framework.Design.Designer
                 Depth = float.MaxValue
             });
 
-            Head.Child = _tabControl = new DesignerTabControl<WorkingDocument>
+            Head.Child = _tabControl = new DocumentTabControl
             {
                 RelativeSizeAxes = Axes.Both
             };
