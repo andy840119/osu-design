@@ -49,7 +49,7 @@ Breaking down the above markup:
 - The root node is a `Container`. When the designer generates a class from this markup, it will be derived from `Container`.
 - `xmlns` attribute specifies the default namespace from which `Drawable` types are imported. The URI must have the `osufx://` scheme, followed by the name of the assembly without `.dll` extension, then a glob pattern to filter the types.
   In this example, `osufx://osu.Framework/*` imports all `Drawable` types from the assembly `osu.Framework.dll`, which match the glob pattern `*` (everything).
-- `Name` attribute specifies the given name of the `Drawable`. This is required for the root node but optional for any of its descendants. Refer to the [ECMA C# spec](https://www.ecma-international.org/publications/files/ECMA-ST-ARCH/ECMA-334%201st%20edition%20December%202001.pdf) for what is considered a valid class name. TLDR: your usual alphanumeric identifier with underscores and no spaces.
+- `Name` attribute specifies the given name of the `Drawable`. This is required for the root node but optional for all of its descendants. Refer to the [ECMA C# spec](https://www.ecma-international.org/publications/files/ECMA-ST-ARCH/ECMA-334%201st%20edition%20December%202001.pdf) for what is considered a valid class name. TLDR: your usual alphanumeric identifier with underscores and no spaces.
   In this example, the `Name` of the root node is `MyDrawable` and therefore the generated class will be named after it.
 - `Size` attribute specifies the size of the `Drawable`, in this case, in absolute measurement. (Add `RelativeSizeAxes="Both"` to make it measure relatively.)
 
