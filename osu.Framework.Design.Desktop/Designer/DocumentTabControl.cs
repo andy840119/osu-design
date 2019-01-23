@@ -5,6 +5,7 @@ using osu.Framework.Design.Workspaces;
 using osu.Framework.Graphics;
 using osu.Framework.Graphics.Shapes;
 using osu.Framework.Graphics.UserInterface;
+using osu.Framework.Input.Events;
 using osuTK;
 
 namespace osu.Framework.Design.Designer
@@ -20,9 +21,22 @@ namespace osu.Framework.Design.Designer
             readonly Bindable<string> _content;
             readonly Bindable<DateTime> _lastWriteTime;
 
+            public class DrawableSyncIndicator : Circle
+            {
+                public Action SaveAction;
+
+                protected override bool OnClick(ClickEvent e)
+                {
+                    base.OnClick(e);
+                    SaveAction?.Invoke();
+
+                    return true;
+                }
+            }
+
             public DocumentTabItem(WorkingDocument value) : base(value)
             {
-                Add(_syncIndicator = new Circle
+                Add(_syncIndicator = new DrawableSyncIndicator
                 {
                     Anchor = Anchor.CentreLeft,
                     Origin = Anchor.CentreLeft,
@@ -30,7 +44,8 @@ namespace osu.Framework.Design.Designer
                     Margin = new MarginPadding
                     {
                         Left = 6
-                    }
+                    },
+                    SaveAction = value.Save
                 });
 
                 _lastWriteTime = value.Document.LastWriteTime.GetBoundCopy();
