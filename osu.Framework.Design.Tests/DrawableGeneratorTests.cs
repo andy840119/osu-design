@@ -14,7 +14,7 @@ namespace osu.Framework.Design.Tests
             //Given
             var doc = new DrawableNode();
             var code =
-@"public class MyContainer : osu.Framework.Graphics.Containers.Container
+@"public partial class MyContainer : osu.Framework.Graphics.Containers.Container
 {
     public osu.Framework.Graphics.Shapes.Box MyBox { get; private set; }
 
@@ -67,7 +67,7 @@ namespace osu.Framework.Design.Tests
         {
             var doc = new DrawableNode();
             var code =
-@"public class MyScreen : osu.Framework.Screens.Screen
+@"public partial class MyScreen : osu.Framework.Screens.Screen
 {
     public osu.Framework.Graphics.Containers.Container MyFirstContainer { get; private set; }
     public osu.Framework.Graphics.Containers.Container MySecondContainer { get; private set; }

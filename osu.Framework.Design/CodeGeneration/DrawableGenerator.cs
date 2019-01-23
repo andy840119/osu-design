@@ -31,7 +31,8 @@ namespace osu.Framework.Design.CodeGeneration
             return ClassDeclaration(
                 attributeLists: List<AttributeListSyntax>(),
                 modifiers: TokenList(
-                    Token(SyntaxKind.PublicKeyword)
+                    Token(SyntaxKind.PublicKeyword),
+                    Token(SyntaxKind.PartialKeyword)
                 ),
                 identifier: Identifier(node.GivenName),
                 typeParameterList: null,
