@@ -38,7 +38,7 @@ Every element in `osuML` represents a `Drawable` node, and their attributes corr
             Colour="#00ff00, #ff00ff, #00ffff, #ff0000"/>
     </Container>
     <SpriteText
-        Text="My SpriteText"
+        Text="My SpriteText is awesome"
         TextSize="20"
         Margin="10,10,10,10"/>
 </Container>
