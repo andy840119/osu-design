@@ -40,7 +40,7 @@ Every element in `osuML` represents a `Drawable` node, and their attributes corr
     <SpriteText
         Text="My SpriteText is awesome"
         TextSize="20"
-        Margin="10,10,10,10"/>
+        Margin="10,20,10,20"/>
 </Container>
 ```
 
