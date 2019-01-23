@@ -9,7 +9,16 @@ namespace osu.Framework.Design.Markup
     {
         public static Drawable CreateDrawable(this DrawableNode node)
         {
-            var drawable = Activator.CreateInstance(node.DrawableType) as Drawable;
+            var arguments = node.DrawableType
+                .GetConstructors()
+                .First(c => c
+                    .GetParameters()
+                    .All(p => p.IsOptional))
+                .GetParameters()
+                .Select(p => p.DefaultValue)
+                .ToArray();
+
+            var drawable = Activator.CreateInstance(node.DrawableType, arguments) as Drawable;
 
             // Apply properties
             foreach (var property in node.Properties.OfType<EmbeddedDrawableProperty>())
