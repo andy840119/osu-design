@@ -45,6 +45,9 @@ namespace osu.Framework.Design.Markup
 
         public void Load(XElement element)
         {
+            if (string.IsNullOrEmpty(element.Name.NamespaceName))
+                throw new MarkupException($"Namespace for element '{element.Name.LocalName}' is not specified");
+
             // Parse type
             DrawableType = DrawableTypeStore.GetDrawable(
                 import: ImportNamespaceInfo.Parse(element.Name.NamespaceName),
