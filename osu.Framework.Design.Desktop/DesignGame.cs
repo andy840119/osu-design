@@ -56,7 +56,11 @@ namespace osu.Framework.Design
 
             // Global workspace
             _dependencies.CacheAs<IFileSystem>(_fileSystem = new FileSystem());
-            _dependencies.Cache(_workspace = new Workspace(_fileSystem.DirectoryInfo.FromDirectoryName(_projectPath)));
+
+            var rootDir = string.IsNullOrEmpty(_projectPath)
+                ? _fileSystem.GetCurrentDirectory()
+                : _fileSystem.DirectoryInfo.FromDirectoryName(_projectPath);
+            _dependencies.Cache(_workspace = new Workspace(rootDir));
         }
 
         protected override void Update()
