@@ -7,8 +7,8 @@
       "request": "launch",
       "preLaunchTask": "build debug",
       "program": "${workspaceFolder}/osu.Framework.Design.Desktop/bin/Debug/netcoreapp2.2/osu.Framework.Design.Desktop.dll",
-      "cwd": "${workspaceFolder}/osu.Framework.Design.Desktop",
-      "args": ["${workspaceFolder}/osu.Framework.Design"],
+      "cwd": "${workspaceFolder}",
+      "args": ["${workspaceFolder}"],
       "console": "internalConsole"
     },
     {
@@ -17,8 +17,8 @@
       "request": "launch",
       "preLaunchTask": "build release",
       "program": "${workspaceFolder}/osu.Framework.Design.Desktop/bin/Release/netcoreapp2.2/osu.Framework.Design.Desktop.dll",
-      "cwd": "${workspaceFolder}/osu.Framework.Design.Desktop",
-      "args": ["${workspaceFolder}/osu.Framework.Design"],
+      "cwd": "${workspaceFolder}",
+      "args": ["${workspaceFolder}"],
       "console": "internalConsole"
     }
   ]
