@@ -26,6 +26,18 @@ namespace osu.Framework.Design.CodeGeneration
             syntax.WriteTo(writer);
         }
 
+        public static NamespaceDeclarationSyntax GenerateSyntax(this DrawableNode node, string namespaceName)
+        {
+            return NamespaceDeclaration(
+                name: ParseName(namespaceName),
+                externs: List<ExternAliasDirectiveSyntax>(),
+                usings: List<UsingDirectiveSyntax>(),
+                members: SingletonList<MemberDeclarationSyntax>(
+                    node.GenerateClassSyntax()
+                )
+            );
+        }
+
         public static ClassDeclarationSyntax GenerateClassSyntax(this DrawableNode node)
         {
             return ClassDeclaration(

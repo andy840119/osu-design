@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Microsoft.CodeAnalysis;
 using osu.Framework.Configuration;
 using osu.Framework.Design.CodeGeneration;
@@ -59,7 +60,9 @@ namespace osu.Framework.Design.Workspaces
 
             // Generate syntax
             var syntax = node
-                .GenerateClassSyntax()
+                .GenerateSyntax(
+                    namespaceName: Document.Workspace.Directory.Name + '.' + string.Join('.', Document.Folders.Select(f => f.Name))
+                )
                 .NormalizeWhitespace();
 
             // Save syntax
