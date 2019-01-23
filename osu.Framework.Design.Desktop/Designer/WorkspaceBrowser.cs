@@ -16,13 +16,13 @@ using osuTK.Graphics;
 
 namespace osu.Framework.Design.Designer
 {
-    public class SolutionBrowser : ComponentWindow
+    public class WorkspaceBrowser : ComponentWindow
     {
         public Action<Document> OpenDocument;
 
         FillFlowContainer<Item> _flow;
 
-        public SolutionBrowser() : base("Explorer")
+        public WorkspaceBrowser() : base("Explorer")
         {
         }
 

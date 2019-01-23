@@ -7,7 +7,7 @@ namespace osu.Framework.Design.Designer
 {
     public class WorkspaceScreen : Screen
     {
-        SolutionBrowser _browser;
+        WorkspaceBrowser _browser;
         DesignerWindow _designer;
 
         [BackgroundDependencyLoader]
@@ -15,7 +15,7 @@ namespace osu.Framework.Design.Designer
         {
             Child = new HalvedContainer(
                 Direction.Horizontal,
-                _browser = new SolutionBrowser
+                _browser = new WorkspaceBrowser
                 {
                     RelativeSizeAxes = Axes.X,
                     Width = 0.2f,
